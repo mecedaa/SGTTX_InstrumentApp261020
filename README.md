@@ -27,7 +27,7 @@ No external packages are needed. The server is a single Node file.
 - When anyone at the table moves a card into or out of a pile, everyone at that table sees it straight away.
 - **Results** (top right) opens the readout cards, the hindsight cards once released, and the other table's choices if that is switched on. The drawer opens by itself when new readouts or hindsight cards arrive.
 - The tables never see the "Value in play" label or the running gauge totals.
-- After the last choice round (round 3, or when the exercise ends), the card grid is replaced by a summary of what the table played in each round: activated, expanded, deprioritised and future interest. On a laptop the readout and hindsight cards stay open beside the summary. On a phone, they open from Results.
+- After the last choice round (round 3, or when the exercise ends), the card grid is replaced by a summary of what the table played in each round: activated, expanded, deprioritised and future interest. On a laptop the readout and hindsight cards stay open beside the summary. On a phone, they open from Results. Tapping any instrument in the summary opens its card, with the readout it produced and its hindsight card once released.
 
 ## Rules the app enforces
 

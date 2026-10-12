@@ -191,7 +191,7 @@ function computeReturns(g, r) {
     const titlesIn = (pile, onlyThisRound) => Object.entries(t.items)
       .filter(([id, it]) => it.pile === pile && cardById(baseOf(id)) && (!onlyThisRound || it.pileRound === r))
       .sort((a, b) => (cardById(baseOf(a[0])).print ?? 99) - (cardById(baseOf(b[0])).print ?? 99))
-      .map(([id, it]) => ({ title: cardById(baseOf(id)).title + (isExp(id) ? ' (Expanded)' : ''), cats: cardById(baseOf(id)).cats, round: it.pileRound }));
+      .map(([id, it]) => ({ id, title: cardById(baseOf(id)).title + (isExp(id) ? ' (Expanded)' : ''), cats: cardById(baseOf(id)).cats, round: it.pileRound }));
     const act = titlesIn('act'), dep = titlesIn('dep', true), fut = titlesIn('fut');
     const notes = [];
     if (dep.length < RULES.depPerRound) notes.push(`Deprioritised ${dep.length} of ${RULES.depPerRound} this round.`);
@@ -232,10 +232,12 @@ function participantState(g, tfKey) {
   const lastChoice = g.choiceRounds.length ? Math.max(...g.choiceRounds) : 0;
   const summary = g.phase === 'ended' || (lastChoice > 0 && g.round > lastChoice);
   const played = Object.keys(g.returns).map(Number).sort().filter(r => roundClosed(g, r) && g.choiceRounds.includes(r))
-    .map(r => { const o = g.returns[r][tfKey]; return { round: r, label: ROUND_LABELS[r] || '', activated: o.lines.map(l => ({ kind: l.kind, title: l.title, cats: l.cats })), act: o.act, dep: o.dep, fut: o.fut }; });
+    .map(r => { const o = g.returns[r][tfKey]; return { round: r, label: ROUND_LABELS[r] || '', activated: o.lines.map(l => ({ id: l.id, kind: l.kind, title: l.title, cats: l.cats })), act: o.act, dep: o.dep, fut: o.fut }; });
+  // card fronts for everything this table has touched, so the summary can open any of them
+  const playedCards = summary ? Object.keys(t.items).filter(id => cardById(baseOf(id))).map(id => front(cardById(baseOf(id)), isExp(id))) : [];
   return {
     code: g.code, tf: tfKey, tfName: TF[tfKey], otherName: TF[other], round: g.round, roundLabel: ROUND_LABELS[g.round] || '', phase: g.phase,
-    choices: choicesOpen(g), rules: RULES, cards, readouts, peek, summary, played,
+    choices: choicesOpen(g), rules: RULES, cards, readouts, peek, summary, played, playedCards,
     hindsight: g.hindsight ? hindsightFor(g, tfKey) : null, v: g.v,
     counts: { act: instrumentsIn(t, 'act'), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') },
   };

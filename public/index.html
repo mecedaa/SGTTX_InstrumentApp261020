@@ -259,7 +259,7 @@ function render() {
   document.body.classList.toggle('summary', !!S.summary);
   document.body.classList.toggle('docked', docked());
   document.getElementById('summary').hidden = !S.summary;
-  if (S.summary) { renderSummary(); if (docked()) { closeCard(); document.getElementById('sheet').classList.add('open'); } }
+  if (S.summary) { renderSummary(); if (docked()) { if (openId) closeCard(); document.getElementById('sheet').classList.add('open'); } }
   document.documentElement.style.setProperty('--hh', document.querySelector('header').getBoundingClientRect().bottom + 'px');
 
   // grid: base cards in print order, fixed slots; expanded cards in their own row
@@ -295,7 +295,7 @@ function render() {
   const banner = document.getElementById('banner');
   let msg = S.phase === 'closed' ? 'This round is closed. Choices are locked while the facilitator reviews them.'
     : S.phase === 'ended' ? 'The exercise has ended. Thank you.'
-    : S.phase === 'open' && !S.choices ? 'There are no instrument choices this round.' : '';
+    : S.phase === 'open' && !S.choices && !S.summary ? 'There are no instrument choices this round.' : '';
   if (fresh.includes('hindsight')) msg = 'Hindsight cards are now available for the instruments your table activated.';
   else if (fresh.includes('readouts')) msg = `Readouts for round ${S.readouts[nRead - 1].round} are now available.`;
   banner.innerHTML = esc(msg) + (fresh.length ? ' <button id="bannerOpen">Open</button>' : '');
@@ -430,16 +430,40 @@ function renderSummary() {
   P.forEach(r => {
     const fresh = new Set(r.activated.map(l => l.title + (l.kind === 'Expanded' ? ' (Expanded)' : '')));
     const kept = r.act.filter(i => !fresh.has(i.title) && !r.act.some(j => j.title === i.title + ' (Expanded)' && fresh.has(j.title)));
-    const li = (i, tag, cls) => `<li class="${cls || ''}">${dots(i.cats)}<button data-read="${r.round}">${esc(i.title)}</button>${tag ? `<small>${tag}</small>` : ''}</li>`;
-    const plain = (i, tag) => `<li>${dots(i.cats)}<span>${esc(i.title)}</span>${tag ? `<small>${tag}</small>` : ''}</li>`;
+    const li = (i, tag, cls) => `<li class="${cls || ''}">${dots(i.cats)}<button data-card="${esc(cardIdFor(i))}" aria-label="Open card: ${esc(i.title)}">${esc(i.title)}</button>${tag ? `<small>${tag}</small>` : ''}</li>`;
+    const plain = li;
     const list = items => items.length ? `<ul>${items.join('')}</ul>` : '<p class="empty">None.</p>';
     h += `<div class="sround"><h3>Round ${r.round}: ${esc(r.label)}</h3><div class="scols">
-      <div><h4>Activated</h4>${list([...r.activated.map(l => li(l, l.kind === 'Expanded' ? 'Expanded' : 'New')), ...kept.map(i => plain(i, 'Still active from R' + i.round).replace('<li>', '<li class="kept">'))])}</div>
+      <div><h4>Activated</h4>${list([...r.activated.map(l => li(l, l.kind === 'Expanded' ? 'Expanded' : 'New')), ...kept.map(i => li(i, 'Still active from R' + i.round, 'kept'))])}</div>
       <div><h4>Deprioritised</h4>${list(r.dep.map(i => plain(i)))}</div>
       <div><h4>Future interest</h4>${list(r.fut.map(i => plain(i)))}</div></div></div>`;
   });
   const el = document.getElementById('summary'); el.innerHTML = h;
-  el.querySelectorAll('[data-read]').forEach(b => b.onclick = () => openSheet('readouts'));
+  el.querySelectorAll('[data-card]').forEach(b => b.onclick = () => openPlayed(b.dataset.card));
+}
+// find the card id for a summary entry (older exercises stored titles only)
+function cardIdFor(i) {
+  if (i.id) return i.id;
+  const exp = / \(Expanded\)$/.test(i.title), t = i.title.replace(/ \(Expanded\)$/, '');
+  const c = (S.playedCards || []).find(k => k.title === t && k.exp === exp);
+  return c ? c.id : '';
+}
+// round 3: a read-only card with the readouts and hindsight this table got for it
+function openPlayed(id) {
+  const c = (S.playedCards || []).find(k => k.id === id); if (!c) return;
+  lastFocus = document.activeElement; openId = null;
+  const baseTitle = c.title;
+  const reads = [];
+  S.readouts.forEach(r => r.lines.forEach(l => { if (l.title === baseTitle && (l.kind === 'Expanded') === c.exp) reads.push({ l, round: r.round }); }));
+  const hs = !c.exp && S.hindsight ? S.hindsight.find(h => h.id === c.base) : null;
+  document.getElementById('bigcard').innerHTML = band(c.cats, c.exp) +
+    `<div class="cbody"><div class="tag"><span>${c.exp ? 'Expanded <span class="two">2</span>' : 'Activate'}</span>${c.print != null ? '<span>No. ' + esc(c.print) + '</span>' : ''}</div>
+     <div class="ctitle">${esc(c.title)}</div><div class="lbl">What you do</div><div class="do">${esc(c.text)}</div></div>
+     ${reads.length ? `<div style="padding:0 20px 4px"><div class="lbl" style="margin-bottom:8px">What happened</div>${reads.map(x => readout(x.l, x.round)).join('<div style="height:10px"></div>')}</div>` : ''}
+     ${hs ? `<div style="padding:12px 20px 4px">${hindsight(hs)}</div>` : ''}
+     <div class="acts" style="margin-top:14px"><button data-close style="grid-column:1/-1">Close</button></div>`;
+  const m = document.getElementById('modal'); m.classList.add('open');
+  m.querySelector('[data-close]').onclick = closeCard; m.querySelector('[data-close]').focus();
 }
 document.getElementById('resBtn').onclick = () => openSheet();
 document.getElementById('closeSheet').onclick = closeSheet;
