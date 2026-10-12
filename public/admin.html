@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adjudicator console: Singapore</title>
+<link rel="stylesheet" href="cards.css">
+<style>
+:root{--navy:#0E2536;--ink:#1F2937;--muted:#6B7280;--line:#D8DEE4;--bg:#F3F5F7;--warn:#B45309;--accent:#1F3A4A}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #F2B233;outline-offset:1px}
+.btn{padding:8px 14px;border-radius:6px;border:1px solid #B8C2CC;background:#fff;color:var(--ink);font-size:14px}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+.btn.big{padding:12px 20px;font-size:16px}
+.btn.danger{color:#991B1B;border-color:#E5B4B4}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=password],textarea{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #B8C2CC;font:inherit;font-size:14px;background:#fff}
+textarea{resize:vertical;line-height:1.45}
+label.f{display:block;font-size:13px;font-weight:600;margin:14px 0 5px}
+.hint{font-size:12.5px;color:var(--muted);margin:3px 0 0;line-height:1.4}
+#login{max-width:360px;margin:14vh auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:26px}
+#login h1{font-size:22px;margin:0 0 14px}
+#loginErr{color:#991B1B;min-height:20px;font-size:14px;margin-top:8px}
+#app{display:none}
+header{display:flex;align-items:center;gap:6px;padding:0 20px;height:54px;background:var(--navy);color:#fff}
+header h1{font-size:17px;margin:0 18px 0 0}
+header nav button{background:transparent;border:0;color:#C9D6DF;padding:17px 12px;font-size:15px;border-bottom:3px solid transparent}
+header nav button[aria-current=page]{color:#fff;border-bottom-color:#F2B233}
+header .spacer{flex:1}
+header .out{background:transparent;border:1px solid #3B5566;color:#fff;padding:6px 12px;border-radius:6px;font-size:13.5px}
+.wrap{display:grid;grid-template-columns:260px 1fr;gap:20px;padding:20px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel h2{font-size:16px;margin:0 0 10px}
+.list{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+.list button{text-align:left;padding:9px 10px;border-radius:6px;border:1px solid var(--line);background:#fff;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.list button[aria-current=true]{border-color:var(--navy);box-shadow:inset 3px 0 0 var(--navy)}
+.list small{color:var(--muted);font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.status{font-size:15px;color:var(--muted);margin:2px 0 14px}
+.status b{color:var(--ink)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px;border:1px solid var(--line);border-radius:8px;background:#FAFBFC;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tf h3{margin:0 0 8px;font-size:15px;display:flex;justify-content:space-between}
+.tf h4{margin:10px 0 5px;font-size:13px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between}
+.tf ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.tf li{font-size:13.5px;display:flex;gap:7px;align-items:center;padding:5px 8px;background:#F6F8FA;border-radius:5px}
+.tf li small{margin-left:auto;color:var(--muted)}
+.empty{font-size:13px;color:var(--muted);font-style:italic}
+.warnline{color:var(--warn);font-size:13px;margin-top:6px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:13.5px}
+.tabs button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.retline{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px}
+.retline .t{font-weight:650;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.retline .k{font-size:12px;color:var(--muted);font-weight:500}
+.retline textarea{margin-top:6px;border-color:#E2E8F0;font-size:14px}
+.saved{font-size:12px;color:#047857;margin-left:6px}
+details{margin-top:16px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.links{font-size:13px;margin:0 0 14px;color:var(--muted)}
+.links code{background:#EEF2F5;padding:2px 6px;border-radius:4px;color:var(--ink)}
+/* cards editor */
+.cardlist button{align-items:center}
+.cardlist .mv{display:flex;gap:2px;margin-left:auto}
+.cardlist .mv span{border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px}
+.editor{display:grid;grid-template-columns:1fr 200px;gap:24px}
+.cats{display:flex;gap:10px;flex-wrap:wrap}
+.cats label,.rounds label{font-size:14px;display:flex;gap:6px;align-items:center}
+.rounds{display:flex;gap:14px}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:6px 14px 14px;margin:16px 0 0}
+legend{font-weight:650;font-size:14px;padding:0 6px}
+.preview{position:sticky;top:20px}
+.preview .card{margin-bottom:14px}
+.preview p{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+/* present mode */
+#present{position:fixed;inset:0;background:#0E2536;color:#fff;display:none;z-index:50;padding:36px 44px;overflow:auto}
+#present.open{display:block}
+#present h2{font-size:30px;margin:0 0 24px}
+#present .cols{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+#present h3{font-size:22px;margin:0 0 14px;color:#F2B233}
+#present .pl{background:#fff;color:var(--ink);border-radius:10px;padding:16px 18px;margin-bottom:12px}
+#present .pl b{font-size:19px;display:block;margin-bottom:4px}
+#present .pl span{font-size:18px;line-height:1.5}
+#present .pl small{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+#present .close{position:absolute;top:20px;right:24px}
+.ico{display:inline-flex;width:22px;height:22px;vertical-align:middle;color:var(--navy)}
+.ico svg{width:100%;height:100%}
+.tfh{display:flex;align-items:center;gap:8px}
+#present .ico{color:#F2B233;width:28px;height:28px}
+#present .pstack{display:flex;flex-direction:column;gap:14px}
+#present .rbody h3{color:var(--ink);font-size:21px}
+#present .rbody p{font-size:18px}
+.totals{margin-top:12px;padding-top:4px;border-top:1px solid var(--line)}
+.totals .gauges{border-top:0;margin-top:4px;padding-top:0}
+.retline .gauges{margin-top:8px;padding-top:8px}
+.links .lk{display:inline-block;margin:2px 10px 2px 0}
+.gridf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select{padding:8px 10px;border-radius:6px;border:1px solid #B8C2CC;font:inherit;font-size:14px;background:#fff}
+input[type=number]{width:100%;padding:8px 10px;border-radius:6px;border:1px solid #B8C2CC;font:inherit;font-size:14px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1F2937;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;display:none;z-index:60}
+@media (max-width:900px){.wrap,.grid2,.editor,#present .cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="login">
+  <h1>Adjudicator console</h1>
+  <label class="f" for="pw">Password</label>
+  <input type="password" id="pw" autocomplete="current-password">
+  <div class="row" style="margin-top:16px"><button class="btn primary" id="loginBtn">Log in</button></div>
+  <div id="loginErr" role="alert"></div>
+</div>
+
+<div id="app">
+  <header>
+    <h1>Adjudicator console</h1>
+    <nav><button data-tab="games" aria-current="page">Exercises</button><button data-tab="cards">Cards</button></nav>
+    <span class="spacer"></span>
+    <button class="out" id="logout">Log out</button>
+  </header>
+
+  <!-- exercises -->
+  <div class="wrap" id="tab-games">
+    <div class="panel">
+      <h2>Exercises</h2>
+      <label class="f" for="newCode">New exercise code</label>
+      <input type="text" id="newCode" placeholder="e.g. playtest1">
+      <p class="hint">Participants type this code to join.</p>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="createBtn">Create exercise</button></div>
+      <div class="list" id="gameList"></div>
+    </div>
+    <div class="panel" id="console"><p class="empty">Create an exercise or choose one from the list.</p></div>
+  </div>
+
+  <!-- cards -->
+  <div class="wrap" id="tab-cards" style="display:none">
+    <div class="panel">
+      <h2>Card library</h2>
+      <p class="hint">Changes apply to running exercises straight away. The table shows cards in Print No. order.</p>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="addCard">Add card</button></div>
+      <div class="list cardlist" id="cardList"></div>
+      <details><summary>Backup and restore</summary>
+        <div class="row" style="margin-top:10px"><button class="btn" id="exportCards">Download library</button>
+        <label class="btn" style="display:inline-block">Upload library<input type="file" id="importCards" accept=".json" hidden></label></div>
+        <p class="hint">Download a copy after editing. On Render's free plan, saved changes are lost when the service restarts.</p>
+        <div class="row" style="margin-top:10px"><button class="btn danger" id="resetCards">Restore the SG Oct 20 set</button></div>
+      </details>
+    </div>
+    <div class="panel" id="cardEditor"><p class="empty">Choose a card to edit.</p></div>
+  </div>
+</div>
+
+<div id="present" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"></div>
+
+<script src="cards.js"></script>
+<script>
+const { CATS, esc, front, dots, readout, gauges, sign, ICON } = CardUI;
+const TF = { BIRD: 'Bird table', FLOWER: 'Flower table' };
+const TFK = Object.keys(TF);
+const VALUES = ['Useful', 'Partly useful', 'Mixed', 'Inert now, later value', 'Harmful'];
+const LABEL = { 1: 'Trigger', 2: 'Escalation', 3: 'Emergency' };
+let token = sessionStorage.getItem('ttx-admin') || '';
+let lastClosed = null, toolsOpen = false, current = null, game = null, retRound = null, cards = [], editId = null, dirty = false, es = null;
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'x-admin-token': token, ...(opts.headers || {}) } });
+  if (r.status === 401) { showLogin(); throw new Error('Log in again.'); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { toast(j.error || 'Something went wrong.'); throw new Error(j.error); }
+  return j;
+}
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3500); }
+
+// ---------- login
+function showLogin() { document.getElementById('login').style.display = 'block'; document.getElementById('app').style.display = 'none'; }
+async function start() {
+  document.getElementById('login').style.display = 'none'; document.getElementById('app').style.display = 'block';
+  await loadGames(); await loadCards();
+  if (es) es.close();
+  es = new EventSource(`/api/events?admin=1&token=${token}`);
+  es.onmessage = () => { if (current) loadGame(current, true); loadGames(); if (!dirty) loadCards(); };
+}
+document.getElementById('loginBtn').onclick = async () => {
+  const r = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: document.getElementById('pw').value }) });
+  const j = await r.json();
+  if (!r.ok) { document.getElementById('loginErr').textContent = j.error; return; }
+  token = j.token; sessionStorage.setItem('ttx-admin', token); start();
+};
+document.getElementById('pw').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginBtn').click(); });
+document.getElementById('logout').onclick = () => { sessionStorage.removeItem('ttx-admin'); token = ''; if (es) es.close(); showLogin(); };
+document.querySelectorAll('header nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('header nav button').forEach(x => x.removeAttribute('aria-current')); b.setAttribute('aria-current', 'page');
+  document.getElementById('tab-games').style.display = b.dataset.tab === 'games' ? '' : 'none';
+  document.getElementById('tab-cards').style.display = b.dataset.tab === 'cards' ? '' : 'none';
+});
+
+// ---------- exercises
+async function loadGames() {
+  const { games } = await api('/api/admin/games');
+  document.getElementById('gameList').innerHTML = games.map(g => `<button data-code="${g.code}" aria-current="${g.code === current}"><span>${esc(g.code)}</span><small>${phaseText(g)}</small></button>`).join('') || '<p class="empty">No exercises yet.</p>';
+  document.querySelectorAll('#gameList button').forEach(b => b.onclick = () => { current = b.dataset.code; retRound = null; loadGame(current); loadGames(); });
+}
+function phaseText(g) { return g.phase === 'lobby' ? 'Not started' : g.phase === 'ended' ? 'Ended' : `Round ${g.round} ${g.phase}`; }
+document.getElementById('createBtn').onclick = async () => {
+  const code = document.getElementById('newCode').value;
+  const { game: g } = await api('/api/admin/games', { method: 'POST', body: JSON.stringify({ code }) });
+  document.getElementById('newCode').value = ''; current = g.code; await loadGames(); loadGame(current);
+};
+async function loadGame(code, quiet) {
+  const active = document.activeElement;
+  if (quiet && active && active.tagName === 'TEXTAREA' && active.closest('#console')) return; // do not clobber an edit in progress
+  try { const j = await api(`/api/admin/games/${code}`); game = j.game; renderGame(); } catch (e) { if (!quiet) toast(e.message); }
+}
+function control(body) { return api(`/api/admin/games/${current}/control`, { method: 'POST', body: JSON.stringify(body) }).then(j => { game = j.game; renderGame(); loadGames(); }); }
+
+function renderGame() {
+  const g = game, el = document.getElementById('console');
+  const closedKey = g.code + ':' + g.round;
+  if (g.phase === 'closed' && g.returns[g.round] && lastClosed !== closedKey) { retRound = g.round; lastClosed = closedKey; }
+  const r = g.round, next = r + 1;
+  let ctl = '';
+  if (g.phase === 'lobby') ctl = `<button class="btn primary big" data-c="open" data-r="1">Start round 1</button>`;
+  else if (g.phase === 'open') ctl = `<button class="btn primary big" data-c="close">Close round ${r}</button><span class="hint">${g.choiceRounds.includes(r) ? `Closing locks the tables' choices and prepares the round ${r} readouts. Tables see them when you open round ${r + 1}.` : 'No instrument choices this round.'}</span>`;
+  else if (g.phase === 'closed') ctl = (next <= 3 ? `<button class="btn primary big" data-c="open" data-r="${next}">Open round ${next}: ${LABEL[next]}</button>` : `<button class="btn primary big" data-c="end">End exercise</button>`)
+    + `<button class="btn" data-c="present" ${g.returns[r] && g.choiceRounds.includes(r) ? '' : 'disabled'}>Present round ${r} readouts</button><button class="btn" data-c="open" data-r="${r}">Reopen round ${r}</button>`
+    + (next <= 3 && g.returns[r] && g.choiceRounds.includes(r) ? `<span class="hint">Opening round ${next} shows the round ${r} readout cards on the tables' screens.</span>` : '');
+  else ctl = `<span>The exercise has ended.</span>`;
+  if (r >= 3 || g.phase === 'ended') ctl += `<button class="btn ${g.hindsight ? '' : 'primary'}" data-c="hindsight">${g.hindsight ? 'Withdraw hindsight cards' : 'Release hindsight cards'}</button>`;
+  const origin = location.origin;
+  el.innerHTML = `
+    <h2 style="font-size:20px">${esc(g.code)}</h2>
+    <p class="status">${g.phase === 'lobby' ? 'Not started. Tables see a waiting screen.' : g.phase === 'ended' ? 'Ended.' : `<b>Round ${r}: ${LABEL[r]}</b>, ${g.phase === 'open' ? (g.choiceRounds.includes(r) ? 'open for choices' : 'open, no instrument choices this round') : 'closed'}`}
+      <br>Readouts on table screens: <b>${g.released.length ? g.released.sort().map(n => 'round ' + n).join(', ') : 'none yet'}</b>. Hindsight cards: <b>${g.hindsight ? 'released' : 'not released'}</b>. Other-table window: <b>${g.peek ? 'on' : 'off'}</b>.</p>
+    <div class="controls">${ctl}</div>
+    <p class="links">Table links: ${TFK.map(k => `<span class="lk">${TF[k]} <code>${origin}/?code=${g.code}&tf=${k}</code> <button class="btn" data-copy="${origin}/?code=${g.code}&tf=${k}">Copy</button></span>`).join(' ')}</p>
+    <div class="grid2">${TFK.map(k => tableHTML(k)).join('')}</div>
+    ${returnsHTML()}
+    <details id="tools" ${toolsOpen ? 'open' : ''}><summary>Settings and tools</summary>
+      <label class="f">Rounds with instrument choices</label>
+      <div class="rounds" id="choiceRounds">${[1, 2, 3].map(n => `<label><input type="checkbox" value="${n}" ${g.choiceRounds.includes(n) ? 'checked' : ''}> Round ${n}</label>`).join('')}</div>
+      <label class="f">Other table</label>
+      <label style="font-size:14px;display:flex;gap:6px;align-items:center"><input type="checkbox" id="peekBox" ${g.peek ? 'checked' : ''}> Let each table see what the other table played, once each round has closed</label>
+      <p class="hint">Leave this off if only one table is playing.</p>
+      <div class="row" style="margin-top:14px">
+        <a class="btn" href="/api/admin/games/${g.code}/log" id="logLink">Download move log (CSV)</a>
+        ${TFK.map(k => `<button class="btn danger" data-reset="${k}">Reset ${TF[k]}</button>`).join('')}
+        <button class="btn danger" id="delGame">Delete exercise</button>
+      </div>
+    </details>`;
+  el.querySelectorAll('[data-c]').forEach(b => b.onclick = () => {
+    const c = b.dataset.c;
+    if (c === 'present') return present(r);
+    if (c === 'hindsight') return control({ action: 'hindsight', on: !g.hindsight });
+    if (c === 'open' && +b.dataset.r === r && g.phase === 'closed' && !confirm(`Reopen round ${r}? Task forces can change their choices again. Returns will be recalculated when you close it.`)) return;
+    control(c === 'open' ? { action: 'open', round: +b.dataset.r } : { action: c });
+  });
+  el.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => navigator.clipboard.writeText(b.dataset.copy).then(() => toast('Link copied.')));
+  el.querySelector('#peekBox').onchange = e => control({ action: 'peek', on: e.target.checked });
+  el.querySelectorAll('#choiceRounds input').forEach(i => i.onchange = () => control({ action: 'choices', rounds: [...el.querySelectorAll('#choiceRounds input:checked')].map(x => +x.value) }));
+  el.querySelectorAll('[data-reset]').forEach(b => b.onclick = () => { if (confirm(`Clear every card position and pile for the ${TF[b.dataset.reset]}? Its readouts already prepared stay, but its piles and move log are cleared.`)) control({ action: 'reset-table', tf: b.dataset.reset }); });
+  el.querySelector('#delGame').onclick = async () => { if (!confirm(`Delete ${g.code} permanently?`)) return; await api(`/api/admin/games/${g.code}`, { method: 'DELETE' }); current = null; game = null; el.innerHTML = '<p class="empty">Exercise deleted.</p>'; loadGames(); };
+  el.querySelector('#logLink').onclick = async e => { e.preventDefault(); const r2 = await fetch(`/api/admin/games/${g.code}/log`, { headers: { 'x-admin-token': token } }); const blob = await r2.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `ttx-${g.code}-moves.csv`; a.click(); };
+  el.querySelector('#tools').addEventListener('toggle', e => { toolsOpen = e.target.open; });
+  bindReturns();
+}
+function tableHTML(k) {
+  const t = game.tables[k], cnt = t.counts;
+  const pile = (list, label, c) => `<h4><span>${label}</span><span>${c}</span></h4>` + (list.length ? `<ul>${list.map(i => `<li>${dots(i.cats)}${esc(i.title)}<small>R${i.round}</small></li>`).join('')}</ul>` : '<p class="empty">None.</p>');
+  const warn = game.phase === 'open' && game.choiceRounds.includes(game.round) && cnt.dep < 3 ? `<p class="warnline">Deprioritised ${cnt.dep} of 3 this round.</p>` : '';
+  const T = t.totals, rounds = Object.keys(T.byRound).filter(n => game.choiceRounds.includes(+n));
+  const tot = `<div class="totals"><h4><span>Running total (facilitator only)</span><span></span></h4>${gauges(clamp(T.econ), clamp(T.pol)).replace('<div class="gauges">', '<div class="gauges tot">')}
+    <p class="hint">Economic <b>${sign(T.econ)}</b>, Political <b>${sign(T.pol)}</b>${rounds.length ? ' (' + rounds.map(n => `R${n}: ${sign(T.byRound[n].econ)} / ${sign(T.byRound[n].pol)}`).join('; ') + ')' : ''}. Sum of the gauges on this table's readouts. The bar shows the total capped at ±2.</p></div>`;
+  return `<div class="panel tf"><h3><span class="tfh"><span class="ico">${ICON[k]}</span>${t.name}</span><span class="hint">${t.moves} moves${game.hindsight ? `, ${t.hindsightCount} hindsight` : ''}</span></h3>${pile(t.act, 'Activate', cnt.act + ' of 3')}${pile(t.dep, 'Deprioritise', cnt.dep + ' this round')}${pile(t.fut, 'Future interest', cnt.fut + ' of 3')}${warn}${tot}</div>`;
+}
+function clamp(n) { return Math.max(-2, Math.min(2, n)); }
+function returnsHTML() {
+  const rounds = Object.keys(game.returns).map(Number).sort().filter(n => game.choiceRounds.includes(n));
+  if (!rounds.length) return '';
+  if (!retRound || !rounds.includes(retRound)) retRound = rounds[rounds.length - 1];
+  const R = game.returns[retRound];
+  const shown = game.released.includes(retRound);
+  return `<div class="panel" style="margin-top:16px"><h2>Readouts</h2>
+    <div class="tabs">${rounds.map(n => `<button data-rr="${n}" aria-pressed="${n === retRound}">Round ${n}</button>`).join('')}</div>
+    <p class="hint" style="margin-bottom:12px">${shown ? `<b>Round ${retRound} readouts are on the tables' screens.</b>` : `<b>Not on the tables' screens yet.</b> They appear when you open round ${retRound + 1}.`} One readout per instrument activated or expanded this round, from the card library. Edit any text for this exercise only; it saves when you click away.</p>
+    <div class="grid2">${TFK.map(k => `<div><h3 style="font-size:15px;margin:0 0 8px">${TF[k]}</h3>
+      ${R[k].lines.length ? R[k].lines.map((l, i) => `<div class="retline"><div class="t"><span>${esc(l.title)}</span><span class="k">${esc(l.kind)}</span></div><textarea rows="3" data-tf="${k}" data-i="${i}">${esc(l.text)}</textarea>${gauges(l.econ, l.pol)}</div>`).join('') : '<p class="empty">No new instruments activated.</p>'}
+      ${R[k].dep.length ? `<p class="hint"><b>Deprioritised:</b> ${R[k].dep.map(d => esc(d.title)).join('; ')}</p>` : ''}
+      ${R[k].fut.length ? `<p class="hint"><b>Future interest:</b> ${R[k].fut.map(d => esc(d.title)).join('; ')}</p>` : ''}
+      ${R[k].notes.map(n => `<p class="warnline">${esc(n)}</p>`).join('')}</div>`).join('')}</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="presentBtn">Present round ${retRound} readouts</button>
+      ${retRound === game.round && game.phase === 'closed' ? '<button class="btn" id="recompute">Recalculate from current choices</button>' : ''}
+    </div></div>`;
+}
+function bindReturns() {
+  document.querySelectorAll('[data-rr]').forEach(b => b.onclick = () => { retRound = +b.dataset.rr; renderGame(); });
+  document.querySelectorAll('.retline textarea').forEach(t => t.onchange = async () => {
+    await api(`/api/admin/games/${current}/returns`, { method: 'PUT', body: JSON.stringify({ round: retRound, tf: t.dataset.tf, index: +t.dataset.i, text: t.value }) });
+    toast('Saved.');
+  });
+  const p = document.getElementById('presentBtn'); if (p) p.onclick = () => present(retRound);
+  const rc = document.getElementById('recompute'); if (rc) rc.onclick = () => { if (confirm('Recalculate? Any edits to these readouts will be replaced with the card library text.')) control({ action: 'recompute' }); };
+}
+function present(r) {
+  const R = game.returns[r]; if (!R) return;
+  const el = document.getElementById('present');
+  el.innerHTML = `<button class="btn close" id="closePresent">Close</button><h2>Round ${r} readouts: ${LABEL[r]}</h2><div class="cols">` +
+    TFK.map(k => `<div><h3><span class="ico">${ICON[k]}</span> ${TF[k]}</h3><div class="pstack">${R[k].lines.length ? R[k].lines.map(l => readout(l, r)).join('') : '<p>No new instruments activated.</p>'}</div></div>`).join('') + '</div>';
+  el.classList.add('open'); document.getElementById('closePresent').focus();
+  document.getElementById('closePresent').onclick = () => el.classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('present').classList.remove('open'); });
+
+// ---------- cards
+async function loadCards() {
+  const j = await api('/api/admin/cards'); cards = j.cards; renderCardList();
+  if (editId && !dirty) renderEditor();
+}
+function renderCardList() {
+  document.getElementById('cardList').innerHTML = cards.map((c, i) => `<button data-id="${c.id}" aria-current="${c.id === editId}">${dots(c.cats)}<span style="flex:1">${c.print != null ? c.print + '. ' : ''}${esc(c.title)}<br><small>${c.value ? esc(c.value) + ' · ' : ''}${c.rounds.length ? 'Rounds ' + c.rounds.join(', ') : 'Not in any round'}</small></span>
+    <span class="mv"><span data-mv="-1" data-i="${i}" title="Move up">&uarr;</span><span data-mv="1" data-i="${i}" title="Move down">&darr;</span></span></button>`).join('');
+  document.querySelectorAll('#cardList button').forEach(b => b.onclick = e => {
+    const mv = e.target.closest('[data-mv]');
+    if (mv) { e.stopPropagation(); return move(+mv.dataset.i, +mv.dataset.mv); }
+    if (dirty && !confirm('Discard unsaved changes to this card?')) return;
+    editId = b.dataset.id; dirty = false; renderCardList(); renderEditor();
+  });
+}
+async function move(i, d) {
+  const j = i + d; if (j < 0 || j >= cards.length) return;
+  [cards[i], cards[j]] = [cards[j], cards[i]]; renderCardList();
+  await api('/api/admin/cards/order', { method: 'POST', body: JSON.stringify({ ids: cards.map(c => c.id) }) });
+}
+function renderEditor() {
+  const c = cards.find(x => x.id === editId); const el = document.getElementById('cardEditor');
+  if (!c) { el.innerHTML = '<p class="empty">Choose a card to edit.</p>'; return; }
+  const rchk = (name, arr) => [1, 2, 3].map(n => `<label><input type="checkbox" name="${name}" value="${n}" ${arr.includes(n) ? 'checked' : ''}> Round ${n}</label>`).join('');
+  const gsel = (id, val) => `<select id="${id}">${[2, 1, 0, -1, -2].map(n => `<option value="${n}" ${n === val ? 'selected' : ''}>${sign(n)}</option>`).join('')}</select>`;
+  el.innerHTML = `<div class="editor"><div>
+    <h2>Edit card</h2>
+    <label class="f" for="e-title">Title</label><input type="text" id="e-title" value="${esc(c.title)}">
+    <div class="gridf"><div><label class="f" for="e-print">Print No.</label><input type="number" id="e-print" value="${c.print ?? ''}"><p class="hint">Sets the order on the table.</p></div>
+      <div><label class="f" for="e-value">Value in play (designer only)</label><select id="e-value" style="width:100%"><option value="">Not set</option>${VALUES.map(x => `<option ${x === c.value ? 'selected' : ''}>${x}</option>`).join('')}</select><p class="hint">Never shown to the tables.</p></div></div>
+    <label class="f">Categories</label><div class="cats">${CATS.map(k => `<label><input type="checkbox" name="cat" value="${k}" ${c.cats.includes(k) ? 'checked' : ''}> ${k}</label>`).join('')}</div>
+    <fieldset><legend>Activate card (round 1 action)</legend>
+      <label class="f">Available in</label><div class="rounds">${rchk('rounds', c.rounds)}</div>
+      <label class="f" for="e-at">What you do (front of card)</label><textarea id="e-at" rows="3">${esc(c.activate.text)}</textarea>
+      <label class="f" for="e-ar">Readout when activated</label><textarea id="e-ar" rows="4">${esc(c.activate.readout)}</textarea>
+      <div class="gridf"><div><label class="f" for="e-ae">Economic gauge</label>${gsel('e-ae', c.activate.econ)}</div><div><label class="f" for="e-ap">Political gauge</label>${gsel('e-ap', c.activate.pol)}</div></div>
+    </fieldset>
+    <fieldset><legend>Expanded card (round 2 action)</legend>
+      <label style="font-size:14px;display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox" id="e-xe" ${c.expanded.enabled ? 'checked' : ''}> This instrument has an Expanded card</label>
+      <label class="f">Available in</label><div class="rounds">${rchk('xrounds', c.expanded.rounds)}</div>
+      <p class="hint">Only shown to a table that activated this instrument in an earlier round.</p>
+      <label class="f" for="e-xt">What you do (front of card)</label><textarea id="e-xt" rows="3">${esc(c.expanded.text)}</textarea>
+      <label class="f" for="e-xr">Readout when expanded</label><textarea id="e-xr" rows="4">${esc(c.expanded.readout)}</textarea>
+      <div class="gridf"><div><label class="f" for="e-xec">Economic gauge</label>${gsel('e-xec', c.expanded.econ)}</div><div><label class="f" for="e-xp">Political gauge</label>${gsel('e-xp', c.expanded.pol)}</div></div>
+    </fieldset>
+    <fieldset><legend>Hindsight card</legend>
+      <label class="f" for="e-h">Hindsight note</label><textarea id="e-h" rows="4">${esc(c.hindsight)}</textarea>
+      <p class="hint">Shown in round 3, after you release hindsight cards, to tables that activated this instrument.</p>
+    </fieldset>
+    <div class="row" style="margin-top:18px"><button class="btn primary" id="saveCard">Save card</button><button class="btn danger" id="delCard">Delete card</button><span id="dirtyNote" class="hint"></span></div>
+  </div>
+  <div class="preview"><p>Activate card</p><div class="card" id="pv1"></div><p>Expanded card</p><div class="card" id="pv2"></div><p>Readout when activated</p><div id="pv3"></div></div></div>`;
+  const num = id => { const x = v(id); return x === '' ? null : +x; };
+  const read = () => ({
+    title: v('e-title'), print: num('e-print'), value: v('e-value'), cats: [...el.querySelectorAll('input[name=cat]:checked')].map(i => i.value),
+    rounds: [...el.querySelectorAll('input[name=rounds]:checked')].map(i => +i.value),
+    activate: { text: v('e-at'), readout: v('e-ar'), econ: +v('e-ae'), pol: +v('e-ap') },
+    expanded: { enabled: document.getElementById('e-xe').checked, rounds: [...el.querySelectorAll('input[name=xrounds]:checked')].map(i => +i.value), text: v('e-xt'), readout: v('e-xr'), econ: +v('e-xec'), pol: +v('e-xp') },
+    hindsight: v('e-h'),
+  });
+  const pv = () => {
+    const d = read();
+    document.getElementById('pv1').innerHTML = front({ title: d.title, print: d.print, cats: d.cats, exp: false, text: d.activate.text });
+    document.getElementById('pv2').innerHTML = d.expanded.enabled ? front({ title: d.title, print: d.print, cats: d.cats, exp: true, text: d.expanded.text }) : '<p class="empty" style="padding:12px">No Expanded card.</p>';
+    document.getElementById('pv3').innerHTML = readout({ kind: 'Activated', title: d.title, cats: d.cats, text: d.activate.readout, econ: d.activate.econ, pol: d.activate.pol }, 1);
+  };
+  pv();
+  const mark = () => { dirty = true; document.getElementById('dirtyNote').textContent = 'Unsaved changes'; pv(); };
+  el.querySelectorAll('input,textarea').forEach(i => i.addEventListener('input', mark));
+  el.querySelectorAll('input[type=checkbox],select').forEach(i => i.addEventListener('change', mark));
+  document.getElementById('saveCard').onclick = async () => {
+    const d = read(); if (!d.cats.length) return toast('Choose at least one category.');
+    await api(`/api/admin/cards/${c.id}`, { method: 'PUT', body: JSON.stringify(d) });
+    dirty = false; toast('Card saved. Running exercises now show the new wording.'); loadCards();
+  };
+  document.getElementById('delCard').onclick = async () => {
+    if (!confirm(`Delete "${c.title}"? It disappears from every exercise, including cards already in a pile.`)) return;
+    await api(`/api/admin/cards/${c.id}`, { method: 'DELETE' }); editId = null; dirty = false; await loadCards(); renderEditor();
+  };
+}
+function v(id) { return document.getElementById(id).value; }
+document.getElementById('addCard').onclick = async () => {
+  if (dirty && !confirm('Discard unsaved changes to this card?')) return;
+  const { card } = await api('/api/admin/cards', { method: 'POST', body: JSON.stringify({ title: 'New instrument' }) });
+  editId = card.id; dirty = false; await loadCards(); renderEditor();
+};
+document.getElementById('exportCards').onclick = () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify({ version: 2, cards }, null, 1)], { type: 'application/json' }));
+  a.download = `instrument-cards-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+};
+document.getElementById('importCards').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  let data; try { data = JSON.parse(await f.text()); } catch (err) { return toast('That file is not valid JSON.'); }
+  if (!confirm(`Replace the whole card library with ${data.cards ? data.cards.length : 0} cards from this file?`)) return;
+  const j = await api('/api/admin/cards/import', { method: 'POST', body: JSON.stringify(data) }); toast(`Imported ${j.count} cards.`); editId = null; dirty = false; loadCards(); renderEditor();
+  e.target.value = '';
+};
+document.getElementById('resetCards').onclick = async () => {
+  if (!confirm('Replace the library with the 15 SG Oct 20 cards from Airtable? Your edits will be lost unless you downloaded them.')) return;
+  await api('/api/admin/cards/reset', { method: 'POST' }); editId = null; dirty = false; loadCards(); renderEditor();
+};
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+if (token) api('/api/admin/cards').then(start).catch(showLogin); else showLogin();
+</script>
+</body>
+</html>

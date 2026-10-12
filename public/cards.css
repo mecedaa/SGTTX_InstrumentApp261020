@@ -1,0 +1,40 @@
+/* Card fronts, readouts and hindsight cards, shared by the table view and the console. Category colours match the printed cards. */
+:root{--ev:#0E7C66;--au:#6A3D9A;--co:#A0770A;--op:#4B5B6B;--paper:#FFFFFF;--ink:#1F2937;--muted:#6B7280;--pos:#15803D;--neg:#B91C1C}
+.card{width:100%;min-height:214px;background:var(--paper);color:var(--ink);border-radius:8px;box-shadow:0 2px 0 rgba(0,0,0,.25),0 6px 16px rgba(0,0,0,.25);overflow:hidden;user-select:none}
+.band{display:flex;height:34px}
+.band span{flex:1;display:flex;align-items:flex-end;padding:0 7px 5px;color:#fff;font-size:9px;font-weight:700;letter-spacing:.02em;line-height:1.05}
+.band span{min-width:0;overflow:hidden}
+.band.n3 span{flex:1 1 auto;font-size:7.5px;padding:0 4px 5px;letter-spacing:0}
+.band.hatch span{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.18) 0 4px,transparent 4px 9px)}
+.cbody{padding:8px 10px}
+.tag{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;gap:6px}
+.tag>span:first-child{display:inline-flex;align-items:center;gap:5px}
+.two{width:18px;height:18px;border-radius:50%;background:var(--ink);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.no{font-weight:600}
+.ctitle{font-size:14.5px;font-weight:750;line-height:1.2;margin-bottom:6px}
+.cdo{font-size:11px;line-height:1.35;color:#374151;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.dots{display:inline-flex;gap:3px;flex:none}
+.dots i{width:10px;height:10px;border-radius:2px;display:block}
+
+/* readout and hindsight cards */
+.rcard,.hcard{background:var(--paper);color:var(--ink);border-radius:10px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,.2),0 6px 16px rgba(0,0,0,.22)}
+.rbody{padding:12px 16px 14px}
+.rbody .tag{font-size:11.5px;margin-bottom:6px}
+.rbody h3{font-size:17px;line-height:1.25;margin:0 0 8px}
+.rbody p{font-size:15px;line-height:1.5;margin:0}
+.hband{height:34px;background:#1F2937;color:#F2B233;font-size:11px;font-weight:800;letter-spacing:.12em;display:flex;align-items:flex-end;padding:0 12px 7px}
+.hcard{border-left:5px solid #F2B233}
+
+/* gauges */
+.gauges{display:grid;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid #E5E7EB}
+.gauge{display:grid;grid-template-columns:76px 1fr 30px;align-items:center;gap:8px;font-size:12.5px}
+.gl{color:var(--muted);font-weight:600}
+.gs{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.gs i{height:10px;border-radius:2px;background:#E5E7EB;display:block}
+.gs i.mid{outline:1px solid #9CA3AF;outline-offset:-1px}
+.gs i.neg{background:var(--neg)}
+.gs i.pos{background:var(--pos)}
+.gs i.zero{background:#9CA3AF}
+.gv{font-weight:700;text-align:right}
+.gv.pos{color:var(--pos)}
+.gv.neg{color:var(--neg)}

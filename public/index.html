@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Instrument table</title>
+<link rel="stylesheet" href="cards.css">
+<style>
+:root{--harbour:#1F3A4A;--harbour-2:#28495C;--navy:#0E2536;--on-dark:#E6EDF2;--on-dark-2:#A9BCC8;--warn:#F2B233}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--on-dark);background:var(--harbour)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,.card:focus-visible,.chip:focus-visible,.slot:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.ico{display:inline-flex;width:26px;height:26px;color:var(--on-dark);flex:none}
+.ico svg{width:100%;height:100%}
+/* join */
+#join{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--navy);z-index:50;padding:16px}
+#join .box{width:min(440px,100%)}
+#join h1{font-size:26px;margin:0 0 6px}
+#join p{color:var(--on-dark-2);margin:0 0 22px;line-height:1.5}
+#join label{display:block;font-size:14px;margin:14px 0 6px;color:var(--on-dark-2)}
+#join input{width:100%;padding:11px 12px;border-radius:6px;border:1px solid #3B5566;background:#0A1C29;color:var(--on-dark);font-size:16px}
+.choice{display:flex;gap:10px}
+.choice button{flex:1;padding:14px 10px;border-radius:8px;border:1px solid #3B5566;background:#0A1C29;color:var(--on-dark);display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:600}
+.choice button .ico{width:40px;height:40px}
+.choice button[aria-pressed=true]{background:var(--on-dark);color:var(--navy);border-color:var(--on-dark)}
+.choice button[aria-pressed=true] .ico{color:var(--navy)}
+#joinBtn{margin-top:24px;width:100%;padding:13px;border:0;border-radius:6px;background:var(--warn);color:#1b1b1b;font-weight:700;font-size:16px}
+#joinErr{color:#FCA5A5;min-height:20px;margin-top:10px;font-size:14px}
+/* frame */
+#app{display:none;height:100%;flex-direction:column}
+header{min-height:56px;display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--navy);border-bottom:1px solid #07131c;flex:none;flex-wrap:wrap}
+header .tf{font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+header .round{padding:4px 10px;border-radius:999px;background:#1C3B50;font-size:14px}
+header .spacer{flex:1}
+header .sync{font-size:13px;color:var(--on-dark-2)}
+.hbtn{padding:8px 14px;border-radius:6px;border:1px solid #3B5566;background:transparent;color:var(--on-dark);font-size:14px;position:relative}
+.hbtn.attn{background:var(--warn);color:#1b1b1b;border-color:var(--warn);font-weight:700}
+#banner{display:none;padding:10px 16px;background:#12303F;color:var(--on-dark);font-size:14.5px;border-bottom:1px solid #0F2330}
+#banner.show{display:block}
+#banner button{margin-left:8px;padding:4px 10px;border-radius:5px;border:1px solid var(--warn);background:transparent;color:var(--warn);font-size:13.5px}
+main{flex:1;overflow:auto;min-height:0;padding:16px}
+main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px;margin-bottom:22px}
+.grid .card{cursor:pointer;touch-action:manipulation}
+.grid .card.dragsrc{opacity:.25}
+.slot{min-height:214px;border:2px dashed rgba(230,237,242,.25);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--on-dark-2);cursor:pointer;background:rgba(0,0,0,.08)}
+.slot b{color:var(--on-dark);font-size:13.5px;line-height:1.3}
+.slot .where{margin-top:auto;font-weight:700;color:var(--warn);font-size:12.5px}
+.ghost{position:fixed;pointer-events:none;z-index:40;transform:rotate(-2deg);box-shadow:0 14px 28px rgba(0,0,0,.4);width:176px}
+/* trays */
+#trays{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:12px 16px 14px;background:var(--harbour-2);border-top:1px solid #16303F;flex:none;max-height:40vh;overflow:auto}
+.tray{border:2px dashed rgba(230,237,242,.35);border-radius:10px;min-height:120px;padding:10px 12px 12px;transition:background .12s,border-color .12s}
+.tray.hot{background:rgba(242,178,51,.12);border-color:var(--warn)}
+.tray.locked{border-style:solid;border-color:rgba(230,237,242,.15)}
+.tray h2{margin:0 0 2px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.tray .count{font-weight:400;font-size:13.5px;color:var(--on-dark-2);white-space:nowrap}
+.tray .count.full{color:var(--warn)}
+.tray .rule{font-size:12.5px;color:var(--on-dark-2);margin:0 0 8px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{background:#fff;color:#1F2937;border-radius:6px;padding:8px 9px;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center;cursor:pointer;user-select:none;touch-action:manipulation}
+.chip.old{opacity:.6}
+.chip .meta{margin-left:auto;font-weight:400;font-size:11.5px;color:#6B7280;white-space:nowrap}
+.empty{font-size:12.5px;color:var(--on-dark-2);font-style:italic}
+/* card dialog */
+.overlay{position:fixed;inset:0;background:rgba(6,16,24,.72);display:none;align-items:center;justify-content:center;z-index:45;padding:16px}
+.overlay.open{display:flex}
+#bigcard{width:min(420px,100%);max-height:100%;overflow:auto;background:#fff;color:#1F2937;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+#bigcard .band{height:56px}
+#bigcard .band span{font-size:12px;padding:0 14px 9px}
+#bigcard .cbody{padding:14px 20px 16px}
+#bigcard .tag{font-size:12px}
+#bigcard .two{width:24px;height:24px;font-size:13px}
+#bigcard .ctitle{font-size:24px;margin:6px 0 14px}
+#bigcard .lbl{font-size:12px;font-weight:700;color:#6B7280;margin-bottom:4px}
+#bigcard .do{font-size:17px;line-height:1.5}
+#bigcard .foot{font-size:13px;font-style:italic;color:#6B7280;margin-top:12px}
+#bigcard .state{font-size:13.5px;font-weight:600;color:#92400E;background:#FEF3C7;border-radius:6px;padding:6px 10px;margin-top:12px}
+#bigcard .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 20px 18px}
+#bigcard .acts button{padding:12px 10px;border-radius:6px;border:1px solid #CBD5E1;background:#F8FAFC;color:#1F2937;font-weight:600}
+#bigcard .acts button.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+#bigcard .acts button:disabled{opacity:.4;cursor:not-allowed}
+/* results drawer */
+#sheet{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);background:#172F3D;border-left:1px solid #0F2330;z-index:44;display:none;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.35)}
+#sheet.open{display:flex}
+#sheet .shead{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #0F2330;flex:none}
+#sheet .shead h2{font-size:17px;margin:0;flex:1}
+#sheet .tabs{display:flex;gap:6px;padding:10px 14px 0;flex:none;flex-wrap:wrap}
+#sheet .tabs button{padding:7px 12px;border-radius:999px;border:1px solid #3B5566;background:transparent;color:var(--on-dark);font-size:13.5px}
+#sheet .tabs button[aria-pressed=true]{background:var(--on-dark);color:var(--navy);border-color:var(--on-dark)}
+#sheet .sbody{flex:1;overflow:auto;padding:14px}
+#sheet .sbody h3.rh{font-size:15px;margin:4px 0 10px;color:var(--warn)}
+#sheet .sbody p.note{font-size:13.5px;color:var(--on-dark-2);line-height:1.5;margin:0 0 14px}
+#sheet .stack{display:flex;flex-direction:column;gap:12px;margin-bottom:22px}
+.peek h4{font-size:13px;color:var(--on-dark-2);margin:10px 0 6px;font-weight:600}
+.peek ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.peek li{background:#fff;color:#1F2937;border-radius:6px;padding:8px 10px;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}
+.peek li small{margin-left:auto;font-weight:400;color:#6B7280}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--warn);color:#1b1b1b;padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;display:none;z-index:60;max-width:90vw;text-align:center}
+#wait{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(14,37,54,.96);z-index:30;font-size:18px;text-align:center;padding:20px;flex-direction:column;gap:14px}
+#wait.show{display:flex}
+#wait .ico{width:56px;height:56px}
+/* phones */
+@media (max-width:720px){
+  header{padding:8px 12px;gap:8px}
+  header .tf{font-size:16px}
+  header .sync{display:none}
+  main{padding:12px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .card{min-height:190px}
+  .slot{min-height:190px}
+  .ctitle{font-size:14px}
+  #trays{grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));max-height:none}
+  .tray{min-height:0;padding:8px;border-width:1.5px;cursor:pointer}
+  .tray h2{font-size:13.5px;flex-direction:column;align-items:flex-start;gap:0}
+  .tray .count{font-size:12px}
+  .tray .rule,.tray .chips{display:none}
+}
+@media (max-width:380px){.grid{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div id="join">
+  <div class="box">
+    <h1>Instrument table</h1>
+    <p>Join your table. Everyone at the same table sees the same cards and the same choices.</p>
+    <label for="code">Exercise code</label>
+    <input id="code" autocomplete="off" autocapitalize="none" placeholder="Given by your facilitator">
+    <label>Your table</label>
+    <div class="choice" id="who">
+      <button data-v="BIRD" aria-pressed="true"><span class="ico" data-icon="BIRD"></span>Bird table</button>
+      <button data-v="FLOWER" aria-pressed="false"><span class="ico" data-icon="FLOWER"></span>Flower table</button>
+    </div>
+    <button id="joinBtn">Join table</button>
+    <div id="joinErr" role="alert"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <span class="tf"><span class="ico" id="tfIcon"></span><span id="tfName"></span></span>
+    <span class="round" id="roundBadge"></span>
+    <span class="spacer"></span>
+    <span class="sync" id="sync"></span>
+    <button class="hbtn" id="resBtn">Results</button>
+  </header>
+  <div id="banner" role="status"></div>
+  <main id="main">
+    <section id="expSec" hidden><h2>Expanded cards you can play this round</h2><div class="grid" id="expGrid"></div></section>
+    <section><h2 id="gridHead">Instrument cards</h2><div class="grid" id="grid"></div></section>
+  </main>
+  <section id="trays">
+    <div class="tray" data-pile="act"><h2>Activate <span class="count" id="c-act"></span></h2><p class="rule">Up to three instruments.</p><div class="chips" id="p-act"></div></div>
+    <div class="tray" data-pile="dep"><h2>Deprioritise <span class="count" id="c-dep"></span></h2><p class="rule">Three each round.</p><div class="chips" id="p-dep"></div></div>
+    <div class="tray" data-pile="fut"><h2>Future interest <span class="count" id="c-fut"></span></h2><p class="rule">Up to three.</p><div class="chips" id="p-fut"></div></div>
+  </section>
+</div>
+<div id="wait"><span class="ico" id="waitIcon"></span><div id="waitText">Waiting for the facilitator to start the exercise.</div></div>
+<div id="modal" class="overlay" role="dialog" aria-modal="true" aria-label="Instrument card"><div id="bigcard"></div></div>
+<div id="pileModal" class="overlay" role="dialog" aria-modal="true" aria-label="Pile"><div id="bigcard2" style="width:min(420px,100%);background:#172F3D;border-radius:12px;padding:16px;max-height:100%;overflow:auto"></div></div>
+<aside id="sheet" role="dialog" aria-label="Results">
+  <div class="shead"><h2>Results</h2><button class="hbtn" id="closeSheet">Close</button></div>
+  <div class="tabs" id="sheetTabs"></div>
+  <div class="sbody" id="sheetBody"></div>
+</aside>
+<div id="toast" role="status"></div>
+
+<script src="cards.js"></script>
+<script>
+const { front, dots, band, esc, readout, hindsight, ICON } = CardUI;
+const PILES = { act: 'Activate', dep: 'Deprioritise', fut: 'Future interest' };
+const who = Math.random().toString(36).slice(2, 8);
+let code = '', tf = 'BIRD', S = null, dragging = false, pending = false, openId = null, tab = 'readouts', openPile = null;
+const store = { get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} } };
+const seen = { readouts: 0, hindsight: false, peek: 0, annR: 0, annH: false };
+
+document.querySelectorAll('[data-icon]').forEach(e => e.innerHTML = ICON[e.dataset.icon]);
+const params = new URLSearchParams(location.search);
+if (params.get('code')) document.getElementById('code').value = params.get('code');
+if (params.get('tf') === 'FLOWER') pick('FLOWER');
+function pick(v) { document.querySelectorAll('#who button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)); }
+document.querySelectorAll('#who button').forEach(b => b.onclick = () => pick(b.dataset.v));
+document.getElementById('code').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('joinBtn').click(); });
+
+document.getElementById('joinBtn').onclick = async () => {
+  code = document.getElementById('code').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  tf = document.querySelector('#who button[aria-pressed="true"]').dataset.v;
+  if (!code) { document.getElementById('joinErr').textContent = 'Enter the exercise code.'; return; }
+  let r, j;
+  try { r = await fetch(`/api/game/${code}/state?tf=${tf}`); j = await r.json(); } catch (e) { document.getElementById('joinErr').textContent = 'Could not reach the server. Try again in a moment.'; return; }
+  if (!r.ok) { document.getElementById('joinErr').textContent = j.error; return; }
+  history.replaceState(null, '', `?code=${code}&tf=${tf}`);
+  const saved = JSON.parse(store.get(`seen:${code}:${tf}`) || 'null'); if (saved) Object.assign(seen, saved);
+  document.getElementById('join').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('tfIcon').innerHTML = ICON[tf]; document.getElementById('waitIcon').innerHTML = ICON[tf];
+  S = j; render(); listen();
+};
+
+async function refresh() {
+  if (dragging || pending) return;
+  try {
+    const r = await fetch(`/api/game/${code}/state?tf=${tf}`);
+    if (r.ok) { const j = await r.json(); if (!S || (j.v || 0) >= (S.v || 0)) { S = j; render(); } setSync(true); } else setSync(false); // ignore responses older than what is shown
+  } catch (e) { setSync(false); }
+}
+function listen() {
+  const es = new EventSource(`/api/events?code=${code}`);
+  es.onmessage = () => refresh();
+  es.onopen = () => setSync(true);
+  es.onerror = () => setSync(false);
+  setInterval(refresh, 8000); // safety net if the stream drops
+}
+function setSync(ok) { document.getElementById('sync').textContent = ok ? 'Live' : 'Reconnecting...'; }
+
+async function act(a) {
+  pending = true;
+  try {
+    const r = await fetch(`/api/game/${code}/action`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...a, tf, who }) });
+    const j = await r.json();
+    if (j.error) toast(j.error);
+    if (j.state) S = j.state;
+  } catch (e) { toast('Could not reach the server. Check your connection and try again.'); }
+  pending = false; render();
+}
+
+// ---------------------------------------------------------------- render
+function render() {
+  if (!S) return;
+  document.getElementById('tfName').textContent = S.tfName;
+  document.getElementById('roundBadge').textContent = S.round ? `Round ${S.round}: ${S.roundLabel}` : 'Not started';
+  document.getElementById('wait').classList.toggle('show', S.phase === 'lobby');
+  document.getElementById('waitText').textContent = `${S.tfName}. Waiting for the facilitator to start the exercise.`;
+  document.querySelectorAll('.tray').forEach(t => t.classList.toggle('locked', !S.choices));
+
+  // grid: base cards in print order, fixed slots; expanded cards in their own row
+  const base = S.cards.filter(c => !c.exp).sort(byPrint), exp = S.cards.filter(c => c.exp).sort(byPrint);
+  const grid = document.getElementById('grid'); grid.innerHTML = '';
+  base.forEach(c => grid.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  const eg = document.getElementById('expGrid'); eg.innerHTML = '';
+  exp.forEach(c => eg.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  document.getElementById('expSec').hidden = !exp.length;
+
+  ['act', 'dep', 'fut'].forEach(p => {
+    const box = document.getElementById('p-' + p); box.innerHTML = '';
+    const list = pileList(p);
+    if (!list.length) box.innerHTML = `<div class="empty">${S.choices ? 'Drag a card here, or open a card and choose.' : 'Empty.'}</div>`;
+    list.forEach(c => box.appendChild(chipEl(c, p)));
+  });
+  const R = S.rules;
+  setCount('c-act', `${S.counts.act} of ${R.actMax}`, S.counts.act >= R.actMax);
+  setCount('c-dep', S.round ? `${S.counts.dep} of ${R.depPerRound}` : '', S.counts.dep >= R.depPerRound);
+  setCount('c-fut', `${S.counts.fut} of ${R.futMax}`, S.counts.fut >= R.futMax);
+
+  // results: readouts, hindsight, other table
+  const nRead = S.readouts.length, hs = !!S.hindsight, nPeek = S.peek ? S.peek.length : 0;
+  const fresh = [];
+  if (nRead > seen.readouts) fresh.push('readouts');
+  if (hs && !seen.hindsight) fresh.push('hindsight');
+  if (nPeek > seen.peek) fresh.push('peek');
+  const resBtn = document.getElementById('resBtn');
+  resBtn.hidden = !(nRead || hs || S.peek);
+  resBtn.classList.toggle('attn', fresh.length > 0);
+  resBtn.textContent = fresh.length ? 'Results (new)' : 'Results';
+
+  const banner = document.getElementById('banner');
+  let msg = S.phase === 'closed' ? 'This round is closed. Choices are locked while the facilitator reviews them.'
+    : S.phase === 'ended' ? 'The exercise has ended. Thank you.'
+    : S.phase === 'open' && !S.choices ? 'There are no instrument choices this round.' : '';
+  if (fresh.includes('hindsight')) msg = 'Hindsight cards are now available for the instruments your table activated.';
+  else if (fresh.includes('readouts')) msg = `Readouts for round ${S.readouts[nRead - 1].round} are now available.`;
+  banner.innerHTML = esc(msg) + (fresh.length ? ' <button id="bannerOpen">Open</button>' : '');
+  banner.classList.toggle('show', !!msg);
+  const bo = document.getElementById('bannerOpen'); if (bo) bo.onclick = () => openSheet(fresh.includes('hindsight') ? 'hindsight' : fresh.includes('readouts') ? 'readouts' : 'peek');
+  // open automatically the first time new readouts or hindsight cards arrive
+  // open the drawer once for each new set of readouts, and once when hindsight cards arrive
+  const newR = nRead > seen.annR, newH = hs && !seen.annH;
+  seen.annR = Math.max(seen.annR, nRead); if (hs) seen.annH = true;
+  if (newH) openSheet('hindsight'); else if (newR) openSheet('readouts');
+  if (newR || newH) store.set(`seen:${code}:${tf}`, JSON.stringify(seen));
+  if (document.getElementById('sheet').classList.contains('open')) renderSheet();
+  if (openId) { if (S.cards.some(c => c.id === openId)) openCard(openId, true); else closeCard(); }
+  if (openPile) showPile(openPile);
+}
+const byPrint = (a, b) => (a.print ?? 99) - (b.print ?? 99);
+function pileList(p) { return S.cards.filter(c => c.pile === p).sort((a, b) => (a.pileRound || 0) - (b.pileRound || 0) || byPrint(a, b)); }
+function setCount(id, t, full) { const e = document.getElementById(id); e.textContent = t; e.classList.toggle('full', !!full); }
+function cardEl(c) {
+  const el = document.createElement('div');
+  el.className = 'card'; el.tabIndex = 0;
+  el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${c.title}${c.exp ? ', expanded' : ''}. Open card.`);
+  el.innerHTML = front(c);
+  bindDrag(el, c);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } });
+  return el;
+}
+function slotEl(c) {
+  const el = document.createElement('div');
+  el.className = 'slot'; el.tabIndex = 0; el.setAttribute('role', 'button');
+  el.innerHTML = `<span>${c.print != null ? 'No. ' + esc(c.print) : ''}${c.exp ? ' Expanded' : ''}</span><b>${esc(c.title)}</b><span class="where">In ${PILES[c.pile]}</span>`;
+  el.onclick = () => openCard(c.id);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } });
+  return el;
+}
+function chipEl(c, p) {
+  const el = document.createElement('div');
+  el.className = 'chip' + (p === 'dep' && c.pileRound < S.round ? ' old' : ''); el.tabIndex = 0; el.setAttribute('role', 'button');
+  el.innerHTML = dots(c.cats) + `<span>${esc(c.title)}${c.exp ? ' (Expanded)' : ''}</span><span class="meta">R${c.pileRound}</span>`;
+  bindDrag(el, c);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } });
+  return el;
+}
+
+// ---------------------------------------------------------------- drag (mouse and pen only; touch uses tap)
+function bindDrag(el, c) {
+  el.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') return; // a tap fires click below
+    if (e.button !== 0) return;
+    const sx = e.clientX, sy = e.clientY;
+    let ghost = null;
+    const move = ev => {
+      if (!ghost && Math.hypot(ev.clientX - sx, ev.clientY - sy) < 6) return;
+      if (!S.choices) return;
+      if (!ghost) { dragging = true; ghost = document.createElement('div'); ghost.className = 'card ghost'; ghost.innerHTML = front(c); document.body.appendChild(ghost); el.classList.add('dragsrc'); }
+      ghost.style.left = (ev.clientX - 88) + 'px'; ghost.style.top = (ev.clientY - 30) + 'px';
+      document.querySelectorAll('.tray').forEach(t => t.classList.remove('hot'));
+      const tr = trayAt(ev.clientX, ev.clientY); if (tr) tr.classList.add('hot');
+    };
+    const up = ev => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+      document.querySelectorAll('.tray').forEach(t => t.classList.remove('hot'));
+      if (!ghost) return; // treated as a click
+      ghost.remove(); el.classList.remove('dragsrc'); dragging = false; el.dataset.dragged = '1';
+      const tr = trayAt(ev.clientX, ev.clientY);
+      if (tr) return act({ type: 'pile', id: c.id, pile: tr.dataset.pile });
+      const trayTop = document.getElementById('trays').getBoundingClientRect().top;
+      if (c.pile && ev.clientY < trayTop) return act({ type: 'pile', id: c.id, pile: null }); // dragged out of a pile, back to its slot
+      render();
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+  el.addEventListener('click', () => { if (el.dataset.dragged) { delete el.dataset.dragged; return; } openCard(c.id); });
+}
+function trayAt(x, y) { return [...document.querySelectorAll('.tray')].find(t => { const r = t.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }) || null; }
+
+// ---------------------------------------------------------------- enlarged card
+let lastFocus = null;
+function openCard(id, keep) {
+  const c = S.cards.find(k => k.id === id); if (!c) return;
+  if (!keep) lastFocus = document.activeElement;
+  openId = id; closePile();
+  const locked = !S.choices;
+  const oldDep = c.pile === 'dep' && c.pileRound < S.round;
+  const btn = (p, label) => `<button data-p="${p}" ${c.pile === p || locked || (oldDep && p !== 'act') ? 'disabled' : ''} class="${p === 'act' ? 'primary' : ''}">${label}</button>`;
+  document.getElementById('bigcard').innerHTML = band(c.cats, c.exp) +
+    `<div class="cbody"><div class="tag"><span>${c.exp ? 'Expanded <span class="two">2</span>' : 'Activate'}</span>${c.print != null ? '<span>No. ' + esc(c.print) + '</span>' : ''}</div>
+     <div class="ctitle">${esc(c.title)}</div><div class="lbl">What you do</div><div class="do">${esc(c.text)}</div>
+     ${c.exp ? '<div class="foot">Playable only if your table has already activated this instrument in a previous round.</div>' : ''}
+     ${c.pile ? `<div class="state">In ${PILES[c.pile]} since round ${c.pileRound}.${oldDep ? ' It can only come back by being activated.' : ''}</div>` : ''}</div>
+     <div class="acts">${btn('act', 'Activate')}${btn('dep', 'Deprioritise')}${btn('fut', 'Future interest')}<button data-p="" ${!c.pile || locked || oldDep ? 'disabled' : ''}>Back to table</button><button data-close style="grid-column:1/-1">Close</button></div>`;
+  const m = document.getElementById('modal'); m.classList.add('open');
+  m.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { closeCard(); act({ type: 'pile', id, pile: b.dataset.p || null }); });
+  m.querySelector('[data-close]').onclick = closeCard;
+  if (!keep) m.querySelector('[data-close]').focus();
+}
+function closeCard() { openId = null; document.getElementById('modal').classList.remove('open'); if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus(); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeCard(); });
+
+// phone: tap a tray to see what is in it
+document.querySelectorAll('.tray').forEach(t => t.addEventListener('click', e => { if (window.matchMedia('(max-width:720px)').matches && !e.target.closest('.chip')) showPile(t.dataset.pile); }));
+function showPile(p) {
+  openPile = p;
+  const list = pileList(p);
+  const box = document.getElementById('bigcard2');
+  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0;font-size:18px">${PILES[p]}</h2><button class="hbtn" id="closePile">Close</button></div>
+    <p class="empty" style="margin:0 0 10px">${p === 'act' ? 'Up to three instruments.' : p === 'dep' ? 'Three each round.' : 'Up to three.'}</p><div class="chips" id="pileChips"></div>`;
+  const chips = box.querySelector('#pileChips');
+  if (!list.length) chips.innerHTML = '<div class="empty">Empty.</div>';
+  list.forEach(c => chips.appendChild(chipEl(c, p)));
+  document.getElementById('pileModal').classList.add('open');
+  box.querySelector('#closePile').onclick = closePile;
+}
+function closePile() { openPile = null; document.getElementById('pileModal').classList.remove('open'); }
+document.getElementById('pileModal').addEventListener('click', e => { if (e.target.id === 'pileModal') closePile(); });
+
+// ---------------------------------------------------------------- results drawer
+function openSheet(t) { const wasOpen = document.getElementById('sheet').classList.contains('open'); if (t) tab = t; document.getElementById('sheet').classList.add('open'); renderSheet(); if (!wasOpen) document.getElementById('closeSheet').focus(); }
+function closeSheet() { document.getElementById('sheet').classList.remove('open'); }
+document.getElementById('resBtn').onclick = () => openSheet();
+document.getElementById('closeSheet').onclick = closeSheet;
+function renderSheet() {
+  const tabs = [['readouts', 'Readouts']];
+  if (S.hindsight) tabs.push(['hindsight', 'Hindsight']);
+  if (S.peek) tabs.push(['peek', S.otherName]);
+  const showTab = tabs.some(t => t[0] === tab) ? tab : 'readouts';
+  document.getElementById('sheetTabs').innerHTML = tabs.map(([k, l]) => `<button data-t="${k}" aria-pressed="${k === showTab}">${esc(l)}</button>`).join('');
+  document.querySelectorAll('#sheetTabs button').forEach(b => b.onclick = () => { tab = b.dataset.t; renderSheet(); });
+  let h = '';
+  if (showTab === 'readouts') {
+    if (!S.readouts.length) h = `<p class="note">Readouts for each round appear here when the facilitator opens the next round.</p>`;
+    S.readouts.slice().reverse().forEach(r => {
+      h += `<h3 class="rh">Round ${r.round}: ${esc(r.label)}</h3>`;
+      h += r.lines.length ? `<div class="stack">${r.lines.map(l => readout(l, r.round)).join('')}</div>` : `<p class="note">Your table activated no new instruments in round ${r.round}.</p>`;
+    });
+    seen.readouts = S.readouts.length;
+  } else if (showTab === 'hindsight') {
+    h = `<p class="note">What officials noted afterwards about the instruments your table activated.</p>`;
+    h += S.hindsight.length ? `<div class="stack">${S.hindsight.map(hindsight).join('')}</div>` : `<p class="note">Your table did not activate any instruments.</p>`;
+    seen.hindsight = true;
+  } else if (showTab === 'peek') {
+    h = `<p class="note">What the ${esc(S.otherName)} played, shown once each round has closed.</p>`;
+    if (!S.peek.length) h += `<p class="note">Nothing to show until the first round closes.</p>`;
+    S.peek.slice().reverse().forEach(r => {
+      const ul = list => list.length ? `<ul>${list.map(i => `<li>${dots(i.cats)}<span>${esc(i.title)}</span><small>R${i.round}</small></li>`).join('')}</ul>` : '<p class="empty">None.</p>';
+      h += `<div class="peek"><h3 class="rh">Round ${r.round}: ${esc(r.label)}</h3><h4>Activate</h4>${ul(r.act)}<h4>Deprioritised this round</h4>${ul(r.dep)}<h4>Future interest</h4>${ul(r.fut)}</div><div style="height:18px"></div>`;
+    });
+    seen.peek = S.peek.length;
+  }
+  document.getElementById('sheetBody').innerHTML = h;
+  store.set(`seen:${code}:${tf}`, JSON.stringify(seen));
+  const resBtn = document.getElementById('resBtn');
+  const stillFresh = S.readouts.length > seen.readouts || (S.hindsight && !seen.hindsight) || (S.peek && S.peek.length > seen.peek);
+  resBtn.classList.toggle('attn', !!stillFresh); resBtn.textContent = stillFresh ? 'Results (new)' : 'Results';
+  const banner = document.getElementById('banner');
+  if (!stillFresh && banner.querySelector('#bannerOpen')) { banner.querySelector('#bannerOpen').remove(); if (/now available/.test(banner.textContent)) banner.classList.remove('show'); }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCard(); closePile(); closeSheet(); } });
+let tt = null;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(tt); tt = setTimeout(() => t.style.display = 'none', 4500); }
+</script>
+</body>
+</html>
