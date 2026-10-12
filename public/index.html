@@ -62,8 +62,10 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 .earlier{margin-top:8px;padding-top:6px;border-top:1px solid rgba(230,237,242,.18)}
 .earlier h3{margin:0 0 4px;font-size:11.5px;font-weight:600;color:var(--on-dark-2)}
 .earlier ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.earlier li{font-size:12px;color:var(--on-dark);display:flex;gap:6px;align-items:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.earlier li{font-size:12px;color:var(--on-dark);display:flex;gap:6px;align-items:center;cursor:grab;user-select:none;touch-action:manipulation;padding:2px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .earlier li span{overflow:hidden;text-overflow:ellipsis}
+.earlier li:hover{background:rgba(255,255,255,.08)}
+.earlier li.dragsrc{opacity:.3}
 .earlier li:focus-visible{outline:2px solid var(--warn)}
 .tray.hot{background:rgba(242,178,51,.12);border-color:var(--warn)}
 .tray.locked{border-style:solid;border-color:rgba(230,237,242,.15)}
@@ -336,7 +338,13 @@ function pileList(p) { return S.cards.filter(c => c.pile === p).sort((a, b) => (
 function earlierEl(list, p) {
   const el = document.createElement('div'); el.className = 'earlier';
   el.innerHTML = `<h3>${p === 'act' ? 'Still active from earlier rounds' : 'Deprioritised in earlier rounds'}</h3><ul>${list.map(c => `<li tabindex="0" role="button" data-id="${esc(c.id)}">${dots(c.cats)}<span>${esc(c.title)}${c.exp ? ' (Expanded)' : ''}</span></li>`).join('')}</ul>`;
-  el.querySelectorAll('li').forEach(li => { li.onclick = e => { e.stopPropagation(); openCard(li.dataset.id); }; li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(li.dataset.id); } }; });
+  // same behaviour as a full chip: drag to another pile (mouse or pen), or click or tap to open the card
+  el.querySelectorAll('li').forEach(li => {
+    const c = S.cards.find(k => k.id === li.dataset.id); if (!c) return;
+    bindDrag(li, c);
+    li.addEventListener('click', e => e.stopPropagation());
+    li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } };
+  });
   return el;
 }
 function setCount(id, t, full) { const e = document.getElementById(id); e.textContent = t; e.classList.toggle('full', !!full); }
