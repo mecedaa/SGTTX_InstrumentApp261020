@@ -1,185 +1,478 @@
 {
  "version": 2,
- "source": "Airtable, AI Crisis Diplomacy Project, table SG Oct 20 Instrument Deck (SG columns), 15 cards, all Locked, read 12 October 2026",
+ "source": "Airtable, AI Crisis Diplomacy Project, table SG Oct 20 Instrument Deck (SG columns), 15 cards, all Locked, rechecked 12 October 2026 after edits",
  "cards": [
   {
-   "id": "permission-checks", "print": 1, "working": 2,
+   "id": "permission-checks",
+   "print": 1,
+   "working": 2,
    "title": "Require permission checks in critical systems",
-   "cats": ["Evidence", "Authority"], "value": "Useful", "rounds": [1, 2],
-   "activate": { "text": "Establish whether port systems verify that a booking belongs to the party changing it.",
-     "readout": "Of 19 port systems checked, 14 let any registered user change another company's records. Each country uses different systems, so answers take a month. Nearly all have the same gap. Logs show thousands of these changes a week.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Require this check in all systems where it is missing.",
-     "readout": "With no common standard, two port authorities act in three weeks. The rest must negotiate with each software vendor. Two operators refuse for safety reasons. Wrong records stay wrong, and nobody can say which past changes were genuine.",
-     "econ": 1, "pol": 1 },
+   "cats": [
+    "Evidence",
+    "Authority"
+   ],
+   "value": "Useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Establish whether port systems verify that a booking belongs to the party changing it.",
+    "readout": "Of 19 port systems checked, 14 let any registered user change another company's records. Each country uses different systems, so answers take a month. Nearly all have the same gap. Logs show thousands of these changes a week.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Require this check in all systems where it is missing.",
+    "readout": "With no common standard, two port authorities act in three weeks. The rest must negotiate with each software vendor. Two operators refuse for safety reasons. Wrong records stay wrong, and nobody can say which past changes were genuine.",
+    "econ": 1,
+    "pol": 1
+   },
    "hindsight": "One port operator notes that adding the check in normal times would have taken a few days of testing. Making the same change to live systems during a disruption takes months and meets safety objections."
   },
   {
-   "id": "incident-reporting", "print": 2, "working": 11,
+   "id": "incident-reporting",
+   "print": 2,
+   "working": 11,
    "title": "Incident reporting",
-   "cats": ["Evidence", "Coordination"], "value": "Partly useful", "rounds": [1, 2],
-   "activate": { "text": "Find out what has already been reported about the disruption, and to whom.",
-     "readout": "Only three countries require port operators to report, and most recorded congestion. Cyber agencies closed all 11 reports as permitted activity. Nobody compared them until now. They show delay and loss, not the cause.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Ask those outside reporting rules, including vendors, freight agents and truckers, to report voluntarily.",
-     "readout": "Four of thirty firms respond, two asking what protection they have. One trucking firm describes bookings appearing and disappearing, the first report of the behaviour itself. One country's operators all refuse.",
-     "econ": 0, "pol": 1 },
+   "cats": [
+    "Evidence",
+    "Coordination"
+   ],
+   "value": "Partly useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Find out what has already been reported about the disruption, and to whom.",
+    "readout": "Only three countries require port operators to report, and most recorded congestion. Cyber agencies closed all 11 reports as permitted activity. Nobody compared them until now. They show delay and loss, not the cause.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Ask those outside reporting rules, including vendors, freight agents and truckers, to report voluntarily.",
+    "readout": "Four of thirty firms respond, two asking what protection they have. One trucking firm describes bookings appearing and disappearing, the first report of the behaviour itself. One country's operators all refuse.",
+    "econ": 0,
+    "pol": 1
+   },
    "hindsight": "Regulators note that even detailed reporting rules are built for known kinds of failure: attacks, accidents, faulty products. This was none of these. Autonomous systems, reacting to each other, caused harm in a way no one had planned for. Much of this is new, and the rules will need to change as new kinds of failure appear."
   },
   {
-   "id": "national-security-framing", "print": 3, "working": 10,
+   "id": "national-security-framing",
+   "print": 3,
+   "working": 10,
    "title": "National security framing and information control",
-   "cats": ["Authority"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Ask member governments to treat the disruption as a matter of national significance and centralise all public messaging.",
-     "readout": "Each country follows its own crisis plan, so the region sends messages that do not match. An online claim of responsibility and unchecked loss figures fill the silence. The security approach makes an attack look confirmed.",
-     "econ": -1, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Restrict what operators and providers may disclose, on security grounds.",
-     "readout": "Only two countries can legally limit disclosure; elsewhere operators ignore it. Vendors use the order to withhold data. When no attacker is found, a trading partner thinks the secrecy hides something. The task force must explain its silence.",
-     "econ": -2, "pol": 0 },
+   "cats": [
+    "Authority"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Ask member governments to treat the disruption as a matter of national significance and centralise all public messaging.",
+    "readout": "Each country follows its own crisis plan, so the region sends messages that do not match. An online claim of responsibility and unchecked loss figures fill the silence. The security approach makes an attack look confirmed.",
+    "econ": 0,
+    "pol": -1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Restrict what operators and providers may disclose, on security grounds.",
+    "readout": "Only two countries can legally limit disclosure; elsewhere operators ignore it. Vendors use the order to withhold data. When no attacker is found, a trading partner thinks the secrecy hides something. The task force must explain its silence.",
+    "econ": 0,
+    "pol": -2
+   },
    "hindsight": "Officials note that a security approach and closed messages are built for attacks. For a failure nobody yet understands, they block the information needed to find the cause."
   },
   {
-   "id": "escalation-thresholds", "print": 4, "working": 6,
+   "id": "escalation-thresholds",
+   "print": 4,
+   "working": 6,
    "title": "Behaviour-based escalation thresholds",
-   "cats": ["Evidence"], "value": "Inert now, later value", "rounds": [1, 2],
-   "activate": { "text": "Agree indicators of abnormal system activity, and the levels at which they trigger escalation.",
-     "readout": "Agreeing what is abnormal takes most of the round, and the companies hold the past data. One port shares its booking fraud warning signs; others track nothing similar. Logs suggest a threshold was passed weeks ago. Nobody has agreed who is alerted.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Lower the thresholds and extend monitoring to connected systems.",
-     "readout": "Alerts confirm what everyone can already see, and staff ignore them within a week. Two more terminals are hit before lower thresholds trigger. Inland rail is affected too. Only three countries can keep monitoring without new staff.",
-     "econ": 0, "pol": 0 },
+   "cats": [
+    "Evidence"
+   ],
+   "value": "Inert now, later value",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Agree indicators of abnormal system activity, and the levels at which they trigger escalation.",
+    "readout": "Agreeing what is abnormal takes most of the round, and the companies hold the past data. One port shares its booking fraud warning signs; others track nothing similar. Logs suggest a threshold was passed weeks ago. Nobody has agreed who is alerted.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Lower the thresholds and extend monitoring to connected systems.",
+    "readout": "Alerts confirm what everyone can already see, and staff ignore them within a week. Two more terminals are hit before lower thresholds trigger. Inland rail is affected too. Only three countries can keep monitoring without new staff.",
+    "econ": 0,
+    "pol": 0
+   },
    "hindsight": "The analysts note that a threshold can only be set against what counts as normal, and normal had been changing for eighteen months without anyone recording it. AI systems keep changing what normal looks like, so thresholds must be reviewed as AI abilities and behaviour change."
   },
   {
-   "id": "public-communication", "print": 5, "working": 12,
+   "id": "public-communication",
+   "print": 5,
+   "working": 12,
    "title": "Public communication and market reassurance",
-   "cats": ["Authority"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Ask member governments to reassure their domestic markets and public that the disruption is under control.",
-     "readout": "Markets stay calm for four days, until two members issue conflicting messages that the media report. With no explanation, the media blame foreign ports, and relations between two members worsen. People trust rumour over reassurance.",
-     "econ": 0, "pol": -1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Ask port operators and industry associations to join a public \"business as usual\" message.",
-     "readout": "Two industry associations sign; most operators refuse, one publicly. The associations' own figures soon contradict the message, and the media report the split. Operators stop sharing data with government.",
-     "econ": 0, "pol": -2 },
+   "cats": [
+    "Authority"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Ask member governments to reassure their domestic markets and public that the disruption is under control.",
+    "readout": "Markets stay calm for four days, until two members issue conflicting messages that the media report. With no explanation, the media blame foreign ports, and relations between two members worsen. People trust rumour over reassurance.",
+    "econ": 0,
+    "pol": -1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Ask port operators and industry associations to join a public \"business as usual\" message.",
+    "readout": "Two industry associations sign; most operators refuse, one publicly. The associations' own figures soon contradict the message, and the media report the split. Operators stop sharing data with government.",
+    "econ": 0,
+    "pol": -2
+   },
    "hindsight": "Communications advisers note that short, plain updates to affected sectors on what is known and not known work better than reassurance or blame. The channels and wording are best prepared in normal times."
   },
   {
-   "id": "emergency-information-sharing", "print": 6, "working": 3,
+   "id": "emergency-information-sharing",
+   "print": 6,
+   "working": 3,
    "title": "Pre-agreed emergency information sharing",
-   "cats": ["Evidence", "Coordination"], "value": "Partly useful", "rounds": [1, 2],
-   "activate": { "text": "Establish an emergency information-sharing arrangement between ports, carriers and systems providers in the region.",
-     "readout": "No arrangement exists; ports share docking data by email and phone. Terminals agree within days, but shipping lines and providers refuse, citing confidentiality. With no regional system, each country negotiates alone, and three refuse to start.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Require the data through existing regulatory, customs and licensing powers.",
-     "readout": "In two countries, customs and licence rules secure part of the data. Providers give partial, edited data, and two countries object to sharing shipping route data. One provider's older logs show the changes began eleven weeks before anyone noticed.",
-     "econ": 0, "pol": 1 },
+   "cats": [
+    "Evidence",
+    "Coordination"
+   ],
+   "value": "Partly useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Establish an emergency information-sharing arrangement between ports, carriers and systems providers in the region.",
+    "readout": "No arrangement exists; ports share docking data by email and phone. Terminals agree within days, but shipping lines and providers refuse, citing confidentiality. With no regional system, each country negotiates alone, and three refuse to start.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Require the data through existing regulatory, customs and licensing powers.",
+    "readout": "In two countries, customs and licence rules secure part of the data. Providers give partial, edited data, and two countries object to sharing shipping route data. One provider's older logs show the changes began eleven weeks before anyone noticed.",
+    "econ": 0,
+    "pol": 1
+   },
    "hindsight": "The shipping industry association notes that an arrangement agreed in advance would have produced the same data within 48 hours."
   },
   {
-   "id": "degraded-mode", "print": 7, "working": 4,
+   "id": "degraded-mode",
+   "print": 7,
+   "working": 4,
    "title": "Degraded-mode operations",
-   "cats": ["Operational continuity"], "value": "Useful", "rounds": [1, 2],
-   "activate": { "text": "Define and test how each port would operate with its digital systems doing less.",
-     "readout": "Fixing ship docking times works; shipping lines object. Human approval works at small ports but is automatic at major terminals. One port that practises for typhoons switches quickly. At four major terminals nobody knows who can order it.",
-     "econ": 1, "pol": 1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Direct ports to move to degraded mode together, coordinating across the region.",
-     "readout": "Two large ports switch a week apart, pushing ships between them. Ports that switch, about 40% of cargo, become predictable, but approval queues form and two operators refuse. The disruption moves rather than shrinks.",
-     "econ": 1, "pol": 0 },
+   "cats": [
+    "Operational continuity"
+   ],
+   "value": "Useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Define and test how each port would operate with its digital systems doing less.",
+    "readout": "Fixing ship docking times works; shipping lines object. Human approval works at small ports but is automatic at major terminals. One port that practises for typhoons switches quickly. At four major terminals nobody knows who can order it.",
+    "econ": 1,
+    "pol": 1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Direct ports to move to degraded mode together, coordinating across the region.",
+    "readout": "Two large ports switch a week apart, pushing ships between them. Ports that switch, about 40% of cargo, become predictable, but approval queues form and two operators refuse. The disruption moves rather than shrinks.",
+    "econ": 1,
+    "pol": 0
+   },
    "hindsight": "The port authorities note that none of these measures would have prevented the disruption. But deciding in advance what degraded mode protects, who can order it, and how nearby ports coordinate would have turned a three-week argument into a decision. Financial markets have used agreed automatic pauses, called circuit breakers, for decades."
   },
   {
-   "id": "cyber-investigation", "print": 8, "working": 8,
+   "id": "cyber-investigation",
+   "print": 8,
+   "working": 8,
    "title": "Cyber attack investigation and attribution",
-   "cats": ["Evidence"], "value": "Mixed", "rounds": [1, 2],
-   "activate": { "text": "Ask national cyber authorities to investigate the cause of the disruption.",
-     "readout": "Teams report separately over six weeks, and two will not share across borders. None finds a break-in, malware, stolen passwords or ransom demand; real accounts were used by their owners' software. Nobody can explain the behaviour, and one team will not rule out an attack.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Refer the investigation to international law enforcement.",
-     "readout": "The referral treats it as a crime. Investigators urge suspending accounts, including two national shipping lines, and one government acts against a neighbour's shipping line. The press reports a confirmed attack; correcting it takes two weeks.",
-     "econ": -1, "pol": -2 },
+   "cats": [
+    "Evidence"
+   ],
+   "value": "Mixed",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Ask national cyber authorities to investigate the cause of the disruption.",
+    "readout": "Teams report separately over six weeks, and two will not share across borders. None finds a break-in, malware, stolen passwords or ransom demand; real accounts were used by their owners' software. Nobody can explain the behaviour, and one team will not rule out an attack.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Refer the investigation to international law enforcement.",
+    "readout": "The referral treats it as a crime. Investigators urge suspending accounts, including two national shipping lines, and one government acts against a neighbour's shipping line. The press reports a confirmed attack; correcting it takes two weeks.",
+    "econ": -1,
+    "pol": -2
+   },
    "hindsight": "The investigators note that the region has no body set up to examine a failure that is not a crime. With only criminal and cyber investigators, they ask only the questions those investigators know how to ask."
   },
   {
-   "id": "liability", "print": 9, "working": 9,
+   "id": "liability",
+   "print": 9,
+   "working": 9,
    "title": "Liability for harm from digital systems",
-   "cats": ["Authority"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Investigate responsibility for harm caused by digital systems, across those who build, run and rely on them.",
-     "readout": "Responsibility is weaker than expected. Consumer law does not cover business scheduling software, and no country regulates such systems. Contracts between shipping lines, ports and vendors apply, and they limit this loss. There is no legal tool for two years.",
-     "econ": 0, "pol": -1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "State publicly that responsibility will be assigned along the chain, and begin drafting.",
-     "readout": "The statement cannot be enforced and costs cooperation. Providers, shipping lines and ports blame each other. Two operators help less, one provider speaks only through lawyers, and insurers raise prices. Nothing changes during the crisis.",
-     "econ": -1, "pol": -1 },
+   "cats": [
+    "Authority"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Investigate responsibility for harm caused by digital systems, across those who build, run and rely on them.",
+    "readout": "Responsibility is weaker than expected. Consumer law does not cover business scheduling software, and no country regulates such systems. Contracts between shipping lines, ports and vendors apply, and they limit this loss. There is no legal tool for two years.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "State publicly that responsibility will be assigned along the chain, and begin drafting.",
+    "readout": "The statement cannot be enforced and costs cooperation. Providers, shipping lines and ports blame each other. Two operators help less, one provider speaks only through lawyers, and insurers raise prices. Nothing changes during the crisis.",
+    "econ": -1,
+    "pol": -1
+   },
    "hindsight": "Lawyers note that liability law assumes someone was at fault or something was faulty. Here each company's systems did mostly what they were built to do, and the harm came from how they interacted. As systems act more autonomously, and companies lose direct control over what they do, who is responsible for the harm is unclear."
   },
   {
-   "id": "regional-coordination", "print": 10, "working": 5,
+   "id": "regional-coordination",
+   "print": 10,
+   "working": 5,
    "title": "Cross-sector regional coordination function",
-   "cats": ["Authority", "Coordination"], "value": "Useful", "rounds": [1, 2],
-   "activate": { "text": "Identify which existing regional body could connect technical and sector expertise, and how it would be called on.",
-     "readout": "The cyber agency, trade ministry and maritime authority each say the problem is not their responsibility, and each is right. Of three bodies considered as a link, none has both political and technical authority. Some suggest the new digital ministry. Two countries prefer an informal arrangement.",
-     "econ": 0, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Task the chosen body to bring technical and sector experts together, and to issue a regular joint update on what is known and what is not.",
-     "readout": "Agreeing a host takes a month, and only for a pilot. The first call joins port, customs and cyber staff, and customs spot a pattern in cargo records. Most members use the honest joint update; one issues a softer one.",
-     "econ": 1, "pol": 1 },
+   "cats": [
+    "Authority",
+    "Coordination"
+   ],
+   "value": "Useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Identify which existing regional body could connect technical and sector expertise, and how it would be called on.",
+    "readout": "The cyber agency, trade ministry and maritime authority each say the problem is not their responsibility, and each is right. Of three bodies considered as a link, none has both political and technical authority. Some suggest the new digital ministry. Two countries prefer an informal arrangement.",
+    "econ": 0,
+    "pol": 0
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Task the chosen body to bring technical and sector experts together, and to issue a regular joint update on what is known and what is not.",
+    "readout": "Agreeing a host takes a month, and only for a pilot. The first call joins port, customs and cyber staff, and customs spot a pattern in cargo records. Most members use the honest joint update; one issues a softer one.",
+    "econ": 1,
+    "pol": 1
+   },
    "hindsight": "Officials note that agreeing which organisations should take part, who brings them together and who speaks for them took three weeks of the response. Agreed in advance, the same arrangement would work for a disruption in any sector."
   },
   {
-   "id": "register-automated-systems", "print": 11, "working": 1,
+   "id": "register-automated-systems",
+   "print": 11,
+   "working": 1,
    "title": "Identify and register automated systems",
-   "cats": ["Evidence"], "value": "Useful", "rounds": [1, 2],
-   "activate": { "text": "Establish which systems are in use in each country's ports and shipping companies.",
-     "readout": "Answers arrive within two weeks. One country has a list from its smart port programme; another cannot legally ask its private terminals. Of 1,340 AI accounts found, only 612 link to a named company. Records show the account, not the system.",
-     "econ": 0, "pol": 1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Make registration compulsory, and require each booking to identify the system that made it.",
-     "readout": "With no regional rule, two countries finish in six weeks and the rest need a year. 2,900 AI systems are registered, one in five active in several countries. Vendors need a year to label bookings in shared systems.",
-     "econ": 0, "pol": 0 },
+   "cats": [
+    "Evidence"
+   ],
+   "value": "Useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Establish which systems are in use in each country's ports and shipping companies.",
+    "readout": "Answers arrive within two weeks. One country has a list from its smart port programme; another cannot legally ask its private terminals. Of 1,340 AI accounts found, only 612 link to a named company. Records show the account, not the system.",
+    "econ": 0,
+    "pol": 1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Make registration compulsory, and require each booking to identify the system that made it.",
+    "readout": "With no regional rule, two countries finish in six weeks and the rest need a year. 2,900 AI systems are registered, one in five active in several countries. Vendors need a year to label bookings in shared systems.",
+    "econ": 0,
+    "pol": 0
+   },
    "hindsight": "The regional port authorities' association notes that a register kept up to date in normal times would have answered this in two days, not two weeks."
   },
   {
-   "id": "priority-rerouting", "print": 12, "working": 15,
+   "id": "priority-rerouting",
+   "print": 12,
+   "working": 15,
    "title": "Priority re-routing and movement restrictions",
-   "cats": ["Authority", "Operational continuity"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Arrange for priority cargo, such as medicines, food and aid, to be diverted to unaffected ports in the region.",
-     "readout": "Diversion takes a week, as each country negotiates alone. One major port accepts cargo for a fee. Receiving ports soon fill, as ships bring the same problem. Two ports quietly favour national cargo.",
-     "econ": -1, "pol": -1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Restrict port entry to priority cargo, holding other vessels at anchor.",
-     "readout": "Port authorities control entry, and waiting areas fill in four days. Unreliable cargo lists put the wrong cargo first. Shipping lines avoid the region. A few cargoes are protected; the region's traffic is lost.",
-     "econ": -2, "pol": -1 },
+   "cats": [
+    "Authority",
+    "Operational continuity"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Arrange for priority cargo, such as medicines, food and aid, to be diverted to unaffected ports in the region.",
+    "readout": "Diversion takes a week, as each country negotiates alone. One major port accepts cargo for a fee. Receiving ports soon fill, as ships bring the same problem. Two ports quietly favour national cargo.",
+    "econ": -1,
+    "pol": -1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Restrict port entry to priority cargo, holding other vessels at anchor.",
+    "readout": "Port authorities control entry, and waiting areas fill in four days. Unreliable cargo lists put the wrong cargo first. Shipping lines avoid the region. A few cargoes are protected; the region's traffic is lost.",
+    "econ": -2,
+    "pol": -1
+   },
    "hindsight": "Port authorities note that priority arrangements work only when the categories are agreed and the cargo data can be trusted before a crisis. Decided during one, each port protects its own terminals first."
   },
   {
-   "id": "kill-switch", "print": 13, "working": 13,
+   "id": "kill-switch",
+   "print": 13,
+   "working": 13,
    "title": "Emergency shutdown (\"kill switch\")",
-   "cats": ["Authority", "Operational continuity"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Direct ports to shut down their automated booking and scheduling systems.",
-     "readout": "Two countries order their ports to shut down; elsewhere ports refuse, and one that shuts down loses ships to a neighbour. Customs and rail bookings fail within hours. Only a provider can stop its product, and some have no kill switch.",
-     "econ": -1, "pol": -1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Use emergency powers to force the providers of those systems to activate their kill switch.",
-     "readout": "One provider obeys under protest, stopping its product worldwide. Existing bookings stay, including wrong ones. A second provider has no kill switch. One member protests that its ports were cut off without its agreement.",
-     "econ": -2, "pol": -2 },
+   "cats": [
+    "Authority",
+    "Operational continuity"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Direct ports to shut down their automated booking and scheduling systems.",
+    "readout": "Two countries order their ports to shut down; elsewhere ports refuse, and one that shuts down loses ships to a neighbour. Customs and rail bookings fail within hours. Only a provider can stop its product, and some have no kill switch.",
+    "econ": -1,
+    "pol": -1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Use emergency powers to force the providers of those systems to activate their kill switch.",
+    "readout": "One provider obeys under protest, stopping its product worldwide. Existing bookings stay, including wrong ones. A second provider has no kill switch. One member protests that its ports were cut off without its agreement.",
+    "econ": -2,
+    "pol": -2
+   },
    "hindsight": "Operators note that a kill switch is the last resort for systems acting beyond their operators' control, and here it was the only option anyone had defined. What was missing were the steps in between: doing less in a planned order, knowing what depends on what, and someone authorised to decide."
   },
   {
-   "id": "pooled-technical-capacity", "print": 14, "working": 7,
+   "id": "pooled-technical-capacity",
+   "print": 14,
+   "working": 7,
    "title": "Pooled regional technical capacity",
-   "cats": ["Evidence", "Authority", "Coordination"], "value": "Useful", "rounds": [1, 2],
-   "activate": { "text": "Ask countries to pool technical and AI experts into a joint analysis team.",
-     "readout": "Four countries pool AI experts and a researcher from the new regional AI safety institute; no provider lends engineers. Cyber teams find no usual signs of attack. Changes follow seconds after a docking slot is freed. Several systems seem to pursue one goal: holding a slot.",
-     "econ": 0, "pol": 1 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Extend the team's remit to compare data across operators.",
-     "readout": "The AI experts begin to suspect the real cause: automated booking agents, each pursuing its own goal, reacting to one another in loops. It points away from an attacker, so the task force can shape its message and response. One port authority orders a short hold on freed slots, and booking changes there halve.",
-     "econ": 1, "pol": 2 },
+   "cats": [
+    "Evidence",
+    "Authority",
+    "Coordination"
+   ],
+   "value": "Useful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Ask countries to pool technical and AI experts into a joint analysis team.",
+    "readout": "Four countries pool AI experts; no provider lends engineers. Cyber teams find no usual signs of attack. Changes follow seconds after a docking slot is freed. Several systems seem to pursue one goal: holding a slot.",
+    "econ": 0,
+    "pol": 1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Extend the team's remit to compare data across operators.",
+    "readout": "The AI experts begin to suspect the real cause: automated booking agents, each pursuing its own goal, reacting to one another in loops. It points away from an attacker, so the task force can shape its message and response. One port authority orders a short hold on freed slots, and booking changes there halve.",
+    "econ": 1,
+    "pol": 2
+   },
    "hindsight": "The team notes that most of its effort went on getting access and learning each company's data formats. Formats and access agreed in advance would have let them start analysis on the first day."
   },
   {
-   "id": "emergency-powers-provider", "print": 15, "working": 14,
+   "id": "emergency-powers-provider",
+   "print": 15,
+   "working": 14,
    "title": "Emergency powers against a provider",
-   "cats": ["Authority"], "value": "Harmful", "rounds": [1, 2],
-   "activate": { "text": "Jointly demand that the main smart-port provider release data on how its systems behaved, under threat of emergency powers.",
-     "readout": "The member country hosting the provider's regional office refuses to join, citing investment. Before stopping cooperation, the provider releases one summary: the unusual activity came from customers' connected systems. The cause may be elsewhere.",
-     "econ": -1, "pol": 0 },
-   "expanded": { "enabled": true, "rounds": [2], "text": "Use emergency powers to require the provider to hand over its data.",
-     "readout": "Two countries use their powers. The provider wins a temporary court ruling in one; the other gets data only for its own ports. Other providers become cautious, and two ministries quietly ask about a replacement.",
-     "econ": -2, "pol": 0 },
+   "cats": [
+    "Authority"
+   ],
+   "value": "Harmful",
+   "rounds": [
+    1,
+    2
+   ],
+   "activate": {
+    "text": "Jointly demand that the main smart-port provider release data on how its systems behaved, under threat of emergency powers.",
+    "readout": "The member country hosting the provider's regional office refuses to join, citing investment. Before stopping cooperation, the provider releases one summary: the unusual activity came from customers' connected systems. The cause may be elsewhere.",
+    "econ": 0,
+    "pol": -1
+   },
+   "expanded": {
+    "enabled": true,
+    "rounds": [
+     2
+    ],
+    "text": "Use emergency powers to require the provider to hand over its data.",
+    "readout": "Two countries use their powers. The provider wins a temporary court ruling in one; the other gets data only for its own ports. Other providers become cautious, and two ministries quietly ask about a replacement.",
+    "econ": 0,
+    "pol": -2
+   },
    "hindsight": "Lawyers note that access to a provider's data is much easier to secure through contracts and licences agreed before a system is used than by emergency order during a crisis, when every demand is challenged."
   }
  ]

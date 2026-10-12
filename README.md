@@ -52,7 +52,7 @@ Each readout card shows the Economic and Political gauges for that readout (-2 t
 
 Open **Cards** in the console. Each card has a title, Print No., categories, the designer-only value label, the Activate and Expanded action text, readouts and gauges for each, and the hindsight note. Saved changes appear in running exercises immediately.
 
-Use **Backup and restore > Download library** after editing. **Upload library** replaces the whole library from a downloaded file. **Restore the SG Oct 20 set** brings back the 15 cards as read from Airtable on 12 October 2026.
+Use **Backup and restore > Download library** after editing. **Upload library** replaces the whole library from a downloaded file. **Restore the SG Oct 20 set** brings back the 15 cards as last checked against Airtable on 12 October 2026.
 
 ## Run it on your own computer
 
