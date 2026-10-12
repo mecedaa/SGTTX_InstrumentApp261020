@@ -49,7 +49,13 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 .grid .cdo{font-size:10.5px;-webkit-line-clamp:7}
 .grid .band span{padding:0 5px 5px;font-size:8.5px}
 .grid .band.n3 span{padding:0 3px 5px;font-size:6.5px}
-#futSec h2 b{color:var(--warn);font-weight:600}
+#gridHead b{font-weight:600}
+#gridHead .k-exp{color:var(--on-dark)}
+#gridHead .k-fut{color:var(--warn)}
+.grid .card{position:relative}
+.grid .card.wasfut{outline:3px solid var(--warn);outline-offset:-3px}
+.futtag{position:absolute;left:0;right:0;bottom:0;background:var(--warn);color:#1b1b1b;font-size:10.5px;font-weight:700;padding:3px 8px}
+.grid .card.wasfut .cdo{-webkit-line-clamp:6}
 .grid .card{cursor:pointer;touch-action:manipulation}
 .grid .card.dragsrc{opacity:.25}
 .slot{min-height:214px;border:2px dashed rgba(230,237,242,.25);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--on-dark-2);cursor:pointer;background:rgba(0,0,0,.08)}
@@ -134,7 +140,7 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 .scols li.kept{background:#E8EEF2}
 .scols li button{all:unset;cursor:pointer;flex:1}
 .scols li button:focus-visible{outline:2px solid var(--warn)}
-body.summary #trays,body.summary #expSec,body.summary #gridSec{display:none}
+body.summary #trays,body.summary #gridSec{display:none}
 body.docked main{margin-right:min(520px,46vw)}
 body.docked #sheet{top:var(--hh,56px);width:min(520px,46vw);box-shadow:none;z-index:10}
 body.docked #closeSheet,body.docked #resBtn{display:none}
@@ -185,8 +191,6 @@ body.docked #closeSheet,body.docked #resBtn{display:none}
   </header>
   <div id="banner" role="status"></div>
   <main id="main">
-    <section id="futSec" hidden><h2><b>Future interest from an earlier round.</b> Back on the table this round.</h2><div class="grid" id="futGrid"></div></section>
-    <section id="expSec" hidden><h2>Expanded cards you can play this round</h2><div class="grid" id="expGrid"></div></section>
     <section id="gridSec"><h2 id="gridHead">Instrument cards</h2><div class="grid" id="grid"></div></section>
     <section id="summary" hidden></section>
   </main>
@@ -280,16 +284,17 @@ function render() {
   document.documentElement.style.setProperty('--hh', document.querySelector('header').getBoundingClientRect().bottom + 'px');
 
   // grid: base cards in print order, fixed slots; expanded cards in their own row
-  const base = S.cards.filter(c => !c.exp).sort(byPrint), exp = S.cards.filter(c => c.exp).sort(byPrint);
+  // one grid: cards placed in a pile in an earlier round are left out entirely (they are listed in the piles);
+  // cards placed this round keep an outline so the others do not jump while the table is choosing.
+  // Order: Expanded cards, then cards back from Future interest, then the rest.
+  const rank = c => c.exp ? 0 : c.wasFut ? 1 : 2;
+  const onTable = S.cards.filter(c => !c.pile || c.pileRound === S.round).sort((a, b) => rank(a) - rank(b) || byPrint(a, b));
   const grid = document.getElementById('grid'); grid.innerHTML = '';
-  base.filter(c => !c.wasFut).forEach(c => grid.appendChild(c.pile ? slotEl(c) : cardEl(c)));
-  const fut = base.filter(c => c.wasFut);
-  const fg = document.getElementById('futGrid'); fg.innerHTML = '';
-  fut.forEach(c => fg.appendChild(c.pile ? slotEl(c) : cardEl(c)));
-  document.getElementById('futSec').hidden = !fut.length;
-  const eg = document.getElementById('expGrid'); eg.innerHTML = '';
-  exp.forEach(c => eg.appendChild(c.pile ? slotEl(c) : cardEl(c)));
-  document.getElementById('expSec').hidden = !exp.length;
+  onTable.forEach(c => grid.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  const nExp = onTable.filter(c => c.exp).length, nFut = onTable.filter(c => c.wasFut).length;
+  document.getElementById('gridHead').innerHTML = S.round > 1
+    ? `Cards you can play this round${nExp || nFut ? ': ' + [nExp ? `<b class="k-exp">${nExp} Expanded</b>` : '', nFut ? `<b class="k-fut">${nFut} back from Future interest</b>` : ''].filter(Boolean).join(', ') + ', then the rest' : ''}`
+    : 'Instrument cards';
 
   ['act', 'dep', 'fut'].forEach(p => {
     const box = document.getElementById('p-' + p); box.innerHTML = '';
@@ -352,7 +357,8 @@ function cardEl(c) {
   const el = document.createElement('div');
   el.className = 'card'; el.tabIndex = 0;
   el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${c.title}${c.exp ? ', expanded' : ''}. Open card.`);
-  el.innerHTML = front(c);
+  el.innerHTML = front(c) + (c.wasFut ? `<div class="futtag">Future interest, round ${esc(c.wasFut)}</div>` : '');
+  if (c.wasFut) el.classList.add('wasfut');
   bindDrag(el, c);
   el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } });
   return el;
