@@ -101,7 +101,29 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 #wait.show{display:flex}
 #wait .ico{width:56px;height:56px}
 /* phones */
+/* round 3 and after: summary of what the table played, results docked beside it on wider screens */
+#summary{max-width:880px}
+#summary .intro{font-size:15px;color:var(--on-dark-2);line-height:1.5;margin:0 0 16px}
+#summary .tally{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+#summary .tally span{background:#12303F;border:1px solid #2C4A5C;border-radius:8px;padding:8px 12px;font-size:14px}
+#summary .tally b{font-size:18px;margin-right:4px}
+.sround{background:#172F3D;border:1px solid #0F2330;border-radius:12px;padding:14px 16px 16px;margin-bottom:16px}
+.sround h3{margin:0 0 12px;font-size:17px;color:var(--warn)}
+.scols{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px}
+.scols h4{margin:0 0 8px;font-size:13px;font-weight:600;color:var(--on-dark-2)}
+.scols ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.scols li{background:#fff;color:#1F2937;border-radius:6px;padding:8px 10px;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:flex-start;line-height:1.3}
+.scols li .dots{margin-top:3px}
+.scols li small{margin-left:auto;font-weight:600;font-size:11px;color:#6B7280;white-space:nowrap;padding-left:6px}
+.scols li.kept{background:#E8EEF2}
+.scols li button{all:unset;cursor:pointer;flex:1}
+.scols li button:focus-visible{outline:2px solid var(--warn)}
+body.summary #trays,body.summary #expSec,body.summary #gridSec{display:none}
+body.docked main{margin-right:min(520px,46vw)}
+body.docked #sheet{top:var(--hh,56px);width:min(520px,46vw);box-shadow:none;z-index:10}
+body.docked #closeSheet,body.docked #resBtn{display:none}
 @media (max-width:720px){
+  .scols{grid-template-columns:1fr}
   header{padding:8px 12px;gap:8px}
   header .tf{font-size:16px}
   header .sync{display:none}
@@ -148,7 +170,8 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
   <div id="banner" role="status"></div>
   <main id="main">
     <section id="expSec" hidden><h2>Expanded cards you can play this round</h2><div class="grid" id="expGrid"></div></section>
-    <section><h2 id="gridHead">Instrument cards</h2><div class="grid" id="grid"></div></section>
+    <section id="gridSec"><h2 id="gridHead">Instrument cards</h2><div class="grid" id="grid"></div></section>
+    <section id="summary" hidden></section>
   </main>
   <section id="trays">
     <div class="tray" data-pile="act"><h2>Activate <span class="count" id="c-act"></span></h2><p class="rule">Up to three instruments.</p><div class="chips" id="p-act"></div></div>
@@ -233,6 +256,11 @@ function render() {
   document.getElementById('wait').classList.toggle('show', S.phase === 'lobby');
   document.getElementById('waitText').textContent = `${S.tfName}. Waiting for the facilitator to start the exercise.`;
   document.querySelectorAll('.tray').forEach(t => t.classList.toggle('locked', !S.choices));
+  document.body.classList.toggle('summary', !!S.summary);
+  document.body.classList.toggle('docked', docked());
+  document.getElementById('summary').hidden = !S.summary;
+  if (S.summary) { renderSummary(); if (docked()) { closeCard(); document.getElementById('sheet').classList.add('open'); } }
+  document.documentElement.style.setProperty('--hh', document.querySelector('header').getBoundingClientRect().bottom + 'px');
 
   // grid: base cards in print order, fixed slots; expanded cards in their own row
   const base = S.cards.filter(c => !c.exp).sort(byPrint), exp = S.cards.filter(c => c.exp).sort(byPrint);
@@ -386,7 +414,33 @@ document.getElementById('pileModal').addEventListener('click', e => { if (e.targ
 
 // ---------------------------------------------------------------- results drawer
 function openSheet(t) { const wasOpen = document.getElementById('sheet').classList.contains('open'); if (t) tab = t; document.getElementById('sheet').classList.add('open'); renderSheet(); if (!wasOpen) document.getElementById('closeSheet').focus(); }
-function closeSheet() { document.getElementById('sheet').classList.remove('open'); }
+function closeSheet() { if (docked()) return; document.getElementById('sheet').classList.remove('open'); }
+function docked() { return !!(S && S.summary) && window.matchMedia('(min-width:721px)').matches; }
+window.addEventListener('resize', () => { if (S) render(); });
+function renderSummary() {
+  const P = S.played || [];
+  const nAct = P.reduce((n, r) => n + r.activated.filter(l => l.kind !== 'Expanded').length, 0);
+  const nExp = P.reduce((n, r) => n + r.activated.filter(l => l.kind === 'Expanded').length, 0);
+  const nDep = P.reduce((n, r) => n + r.dep.length, 0);
+  const last = P[P.length - 1];
+  let h = `<h2 style="font-size:20px;color:var(--on-dark);margin:0 0 6px">What the ${esc(S.tfName)} played</h2>
+    <p class="intro">Instrument choices are closed. ${docked() ? 'Your readout cards' + (S.hindsight ? ' and hindsight cards' : '') + ' are on the right.' : 'Open Results to see your readout cards' + (S.hindsight ? ' and hindsight cards' : '') + '.'}</p>
+    <div class="tally"><span><b>${nAct}</b>activated</span><span><b>${nExp}</b>expanded</span><span><b>${nDep}</b>deprioritised</span>${last ? `<span><b>${last.fut.length}</b>future interest</span>` : ''}</div>`;
+  if (!P.length) h += '<p class="intro">Nothing was played.</p>';
+  P.forEach(r => {
+    const fresh = new Set(r.activated.map(l => l.title + (l.kind === 'Expanded' ? ' (Expanded)' : '')));
+    const kept = r.act.filter(i => !fresh.has(i.title) && !r.act.some(j => j.title === i.title + ' (Expanded)' && fresh.has(j.title)));
+    const li = (i, tag, cls) => `<li class="${cls || ''}">${dots(i.cats)}<button data-read="${r.round}">${esc(i.title)}</button>${tag ? `<small>${tag}</small>` : ''}</li>`;
+    const plain = (i, tag) => `<li>${dots(i.cats)}<span>${esc(i.title)}</span>${tag ? `<small>${tag}</small>` : ''}</li>`;
+    const list = items => items.length ? `<ul>${items.join('')}</ul>` : '<p class="empty">None.</p>';
+    h += `<div class="sround"><h3>Round ${r.round}: ${esc(r.label)}</h3><div class="scols">
+      <div><h4>Activated</h4>${list([...r.activated.map(l => li(l, l.kind === 'Expanded' ? 'Expanded' : 'New')), ...kept.map(i => plain(i, 'Still active from R' + i.round).replace('<li>', '<li class="kept">'))])}</div>
+      <div><h4>Deprioritised</h4>${list(r.dep.map(i => plain(i)))}</div>
+      <div><h4>Future interest</h4>${list(r.fut.map(i => plain(i)))}</div></div></div>`;
+  });
+  const el = document.getElementById('summary'); el.innerHTML = h;
+  el.querySelectorAll('[data-read]').forEach(b => b.onclick = () => openSheet('readouts'));
+}
 document.getElementById('resBtn').onclick = () => openSheet();
 document.getElementById('closeSheet').onclick = closeSheet;
 function renderSheet() {

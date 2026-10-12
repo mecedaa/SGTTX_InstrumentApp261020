@@ -228,9 +228,14 @@ function participantState(g, tfKey) {
     .map(r => ({ round: r, label: ROUND_LABELS[r] || '', lines: g.returns[r][tfKey].lines.map(l => ({ kind: l.kind, title: l.title, cats: l.cats, text: l.text, econ: l.econ, pol: l.pol })) }));
   const peek = g.peek ? Object.keys(g.returns).map(Number).sort().filter(r => roundClosed(g, r) && g.choiceRounds.includes(r))
     .map(r => { const o = g.returns[r][other]; return { round: r, label: ROUND_LABELS[r] || '', act: o.act, dep: o.dep, fut: o.fut }; }) : null;
+  // after the last choice round, the table view becomes a summary of what this table played
+  const lastChoice = g.choiceRounds.length ? Math.max(...g.choiceRounds) : 0;
+  const summary = g.phase === 'ended' || (lastChoice > 0 && g.round > lastChoice);
+  const played = Object.keys(g.returns).map(Number).sort().filter(r => roundClosed(g, r) && g.choiceRounds.includes(r))
+    .map(r => { const o = g.returns[r][tfKey]; return { round: r, label: ROUND_LABELS[r] || '', activated: o.lines.map(l => ({ kind: l.kind, title: l.title, cats: l.cats })), act: o.act, dep: o.dep, fut: o.fut }; });
   return {
     code: g.code, tf: tfKey, tfName: TF[tfKey], otherName: TF[other], round: g.round, roundLabel: ROUND_LABELS[g.round] || '', phase: g.phase,
-    choices: choicesOpen(g), rules: RULES, cards, readouts, peek,
+    choices: choicesOpen(g), rules: RULES, cards, readouts, peek, summary, played,
     hindsight: g.hindsight ? hindsightFor(g, tfKey) : null, v: g.v,
     counts: { act: instrumentsIn(t, 'act'), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') },
   };
