@@ -40,7 +40,7 @@ No external packages are needed. The server is a single Node file.
 
 When you close a round, each table gets one readout card for each instrument it activated or expanded that round. An instrument activated in round 1 or round 2 gets the round 1 readout. Its Expanded card gets the round 2 readout. An instrument that stays in Activate without being expanded gets no new readout.
 
-Each readout card shows the Economic and Political gauges for that readout (-2 to +2). The console shows each table's running total: the sum of the gauges on all its readouts, with a breakdown by round. Edits you make to a readout in the console apply to that exercise only. To change the text for future exercises, edit the card.
+Each readout card shows the Economic and Political gauges for that readout (-2 to +2). The console shows each table's running total as a number with no upper or lower limit: the sum of the gauges on all its readouts, with a breakdown by round. Edits you make to a readout in the console apply to that exercise only. To change the text for future exercises, edit the card.
 
 ## Settings and tools (in the console)
 

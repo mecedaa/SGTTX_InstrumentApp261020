@@ -93,7 +93,10 @@ legend{font-weight:650;font-size:14px;padding:0 6px}
 #present .rbody h3{color:var(--ink);font-size:21px}
 #present .rbody p{font-size:18px}
 .totals{margin-top:12px;padding-top:4px;border-top:1px solid var(--line)}
-.totals .gauges{border-top:0;margin-top:4px;padding-top:0}
+.tgrid{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:4px 12px;align-items:baseline;margin:2px 0 6px;font-size:14px;color:var(--muted)}
+.tnum{font-size:26px;color:var(--ink)}
+.tnum.pos{color:#15803D}
+.tnum.neg{color:#B91C1C}
 .retline .gauges{margin-top:8px;padding-top:8px}
 .links .lk{display:inline-block;margin:2px 10px 2px 0}
 .gridf{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -270,11 +273,12 @@ function tableHTML(k) {
   const pile = (list, label, c) => `<h4><span>${label}</span><span>${c}</span></h4>` + (list.length ? `<ul>${list.map(i => `<li>${dots(i.cats)}${esc(i.title)}<small>R${i.round}</small></li>`).join('')}</ul>` : '<p class="empty">None.</p>');
   const warn = game.phase === 'open' && game.choiceRounds.includes(game.round) && cnt.dep < 3 ? `<p class="warnline">Deprioritised ${cnt.dep} of 3 this round.</p>` : '';
   const T = t.totals, rounds = Object.keys(T.byRound).filter(n => game.choiceRounds.includes(+n));
-  const tot = `<div class="totals"><h4><span>Running total (facilitator only)</span><span></span></h4>${gauges(clamp(T.econ), clamp(T.pol)).replace('<div class="gauges">', '<div class="gauges tot">')}
-    <p class="hint">Economic <b>${sign(T.econ)}</b>, Political <b>${sign(T.pol)}</b>${rounds.length ? ' (' + rounds.map(n => `R${n}: ${sign(T.byRound[n].econ)} / ${sign(T.byRound[n].pol)}`).join('; ') + ')' : ''}. Sum of the gauges on this table's readouts. The bar shows the total capped at ±2.</p></div>`;
+  const num = v => `<b class="tnum ${v > 0 ? 'pos' : v < 0 ? 'neg' : ''}">${sign(v)}</b>`;
+  const tot = `<div class="totals"><h4><span>Running total (facilitator only)</span><span></span></h4>
+    <div class="tgrid"><span>Economic</span>${num(T.econ)}<span>Political</span>${num(T.pol)}</div>
+    <p class="hint">${rounds.length ? rounds.map(n => `Round ${n}: Economic ${sign(T.byRound[n].econ)}, Political ${sign(T.byRound[n].pol)}`).join('. ') + '. ' : ''}Sum of the gauges on this table's readouts.</p></div>`;
   return `<div class="panel tf"><h3><span class="tfh"><span class="ico">${ICON[k]}</span>${t.name}</span><span class="hint">${t.moves} moves${game.hindsight ? `, ${t.hindsightCount} hindsight` : ''}</span></h3>${pile(t.act, 'Activate', cnt.act + ' of 3')}${pile(t.dep, 'Deprioritise', cnt.dep + ' this round')}${pile(t.fut, 'Future interest', cnt.fut + ' of 3')}${warn}${tot}</div>`;
 }
-function clamp(n) { return Math.max(-2, Math.min(2, n)); }
 function returnsHTML() {
   const rounds = Object.keys(game.returns).map(Number).sort().filter(n => game.choiceRounds.includes(n));
   if (!rounds.length) return '';
