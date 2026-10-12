@@ -33,8 +33,9 @@ No external packages are needed. The server is a single Node file.
 
 - Activate takes up to three cards each round: new instruments, Expanded cards, or a mix. Instruments activated in an earlier round stay active, do not count toward the three, and cannot be moved.
 - Deprioritise takes three per round. Cards deprioritised in an earlier round stay in the pile and can only come back by being activated.
+- To bring back a card deprioritised in an earlier round, the table must give up one instrument it activated in an earlier round. The app asks which one. The given-up instrument goes back on the table (marked "Given up") and its Expanded card is removed; the brought-back card uses one of that round's three Activate choices and gets its round 1 readout. Moving the brought-back card out of Activate in the same round undoes the swap. The console readout notes record each swap.
 - Future interest holds up to three. When you open the next round, Future interest cards go back on the table, marked in yellow, and the Future interest pile starts empty.
-- An Expanded card is only playable if the table activated that instrument in an earlier round.
+- An Expanded card is only playable if the table activated that instrument in an earlier round and it is still active.
 
 ## Readouts and gauges
 

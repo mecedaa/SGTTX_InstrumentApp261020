@@ -55,6 +55,10 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 .grid .card{position:relative}
 .grid .card.wasfut{outline:3px solid var(--warn);outline-offset:-3px}
 .futtag{position:absolute;left:0;right:0;bottom:0;background:var(--warn);color:#1b1b1b;font-size:10.5px;font-weight:700;padding:3px 8px}
+.futtag.gave{background:#4B5563;color:#fff}
+.grid .card.gaveup{opacity:.75}
+button.chip.giveup{font:inherit;font-weight:600;width:100%;cursor:pointer;padding:11px 12px}
+button.chip.giveup:hover{background:#FEF3C7}
 .grid .card.wasfut .cdo{-webkit-line-clamp:6}
 .grid .card{cursor:pointer;touch-action:manipulation}
 .grid .card.dragsrc{opacity:.25}
@@ -265,8 +269,23 @@ async function act(a) {
     const j = await r.json();
     if (j.error) toast(j.error);
     if (j.state) S = j.state;
+    if (j.needGiveUp) { pending = false; render(); return chooseGiveUp(a, j.needGiveUp); }
   } catch (e) { toast('Could not reach the server. Check your connection and try again.'); }
   pending = false; render();
+}
+// bringing back a card deprioritised in an earlier round: the table picks one earlier activation to give up
+function chooseGiveUp(a, options) {
+  const c = S.cards.find(k => k.id === a.id); if (!c) return;
+  closeCard(); closePile();
+  const box = document.getElementById('bigcard2');
+  box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px"><h2 style="margin:0;font-size:18px">Bring back a deprioritised card</h2><button class="hbtn" id="closePile">Cancel</button></div>
+    <p style="font-size:14.5px;line-height:1.5;margin:0 0 6px">To activate <b>${esc(c.title)}</b>, your table must give up one instrument it activated in an earlier round.</p>
+    <p class="empty" style="margin:0 0 12px;font-style:normal">The instrument you give up goes back on the table and its Expanded card is removed. Bringing this card back also uses one of this round's three Activate choices.</p>
+    <div class="chips">${options.map(o => `<button class="chip giveup" data-g="${esc(o.id)}" style="border:0;text-align:left">${dots(o.cats)}<span>Give up: ${esc(o.title)}</span></button>`).join('')}</div>`;
+  document.getElementById('pileModal').classList.add('open');
+  box.querySelector('#closePile').onclick = closePile;
+  box.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { closePile(); act({ ...a, giveUp: b.dataset.g }); });
+  box.querySelector('[data-g]').focus();
 }
 
 // ---------------------------------------------------------------- render
@@ -357,8 +376,9 @@ function cardEl(c) {
   const el = document.createElement('div');
   el.className = 'card'; el.tabIndex = 0;
   el.setAttribute('role', 'button'); el.setAttribute('aria-label', `${c.title}${c.exp ? ', expanded' : ''}. Open card.`);
-  el.innerHTML = front(c) + (c.wasFut ? `<div class="futtag">Future interest, round ${esc(c.wasFut)}</div>` : '');
-  if (c.wasFut) el.classList.add('wasfut');
+  el.innerHTML = front(c) + (c.givenUp ? `<div class="futtag gave">Given up in round ${esc(c.givenUp)}</div>` : c.wasFut ? `<div class="futtag">Future interest, round ${esc(c.wasFut)}</div>` : '');
+  if (c.wasFut && !c.givenUp) el.classList.add('wasfut');
+  if (c.givenUp) el.classList.add('gaveup');
   bindDrag(el, c);
   el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(c.id); } });
   return el;
@@ -420,12 +440,12 @@ function openCard(id, keep) {
   openId = id; closePile();
   const locked = !S.choices;
   const oldDep = c.pile === 'dep' && c.pileRound < S.round, oldAct = c.pile === 'act' && c.pileRound < S.round;
-  const btn = (p, label) => `<button data-p="${p}" ${c.pile === p || locked || oldAct || (oldDep && p !== 'act') ? 'disabled' : ''} class="${p === 'act' ? 'primary' : ''}">${label}</button>`;
+  const btn = (p, label) => `<button data-p="${p}" ${c.pile === p || locked || oldAct || (oldDep && p !== 'act') || (c.givenUp === S.round && p === 'act') ? 'disabled' : ''} class="${p === 'act' ? 'primary' : ''}">${label}</button>`;
   document.getElementById('bigcard').innerHTML = band(c.cats, c.exp) +
     `<div class="cbody"><div class="tag"><span>${c.exp ? 'Expanded <span class="two">2</span>' : 'Activate'}</span>${c.print != null ? '<span>No. ' + esc(c.print) + '</span>' : ''}</div>
      <div class="ctitle">${esc(c.title)}</div><div class="lbl">What you do</div><div class="do">${esc(c.text)}</div>
      ${c.exp ? '<div class="foot">Playable only if your table has already activated this instrument in a previous round.</div>' : ''}
-     ${c.pile ? `<div class="state">In ${PILES[c.pile]} since round ${c.pileRound}.${oldDep ? ' It can only come back by being activated.' : ''}${oldAct ? ' It stays active.' : ''}</div>` : c.wasFut ? `<div class="state">Marked for future interest in round ${c.wasFut}.</div>` : ''}</div>
+     ${c.pile ? `<div class="state">In ${PILES[c.pile]} since round ${c.pileRound}.${oldDep ? ' It can only come back by being activated, and your table must give up an instrument it activated in an earlier round.' : ''}${oldAct ? ' It stays active.' : ''}${c.swapped ? ' Brought back from Deprioritise. Moving it out of Activate undoes the swap.' : ''}</div>` : c.givenUp ? `<div class="state">Your table gave this up in round ${c.givenUp} to bring back a deprioritised card.</div>` : c.wasFut ? `<div class="state">Marked for future interest in round ${c.wasFut}.</div>` : ''}</div>
      <div class="acts">${btn('act', 'Activate')}${btn('dep', 'Deprioritise')}${btn('fut', 'Future interest')}<button data-p="" ${!c.pile || locked || oldDep || oldAct ? 'disabled' : ''}>Back to table</button><button data-close style="grid-column:1/-1">Close</button></div>`;
   const m = document.getElementById('modal'); m.classList.add('open');
   m.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { closeCard(); act({ type: 'pile', id, pile: b.dataset.p || null }); });
@@ -474,7 +494,7 @@ function renderSummary() {
     const plain = li;
     const list = items => items.length ? `<ul>${items.join('')}</ul>` : '<p class="empty">None.</p>';
     h += `<div class="sround"><h3>Round ${r.round}: ${esc(r.label)}</h3><div class="scols">
-      <div><h4>Activated</h4>${list([...r.activated.map(l => li(l, l.kind === 'Expanded' ? 'Expanded' : 'New')), ...kept.map(i => li(i, 'Still active from R' + i.round, 'kept'))])}</div>
+      <div><h4>Activated</h4>${list([...r.activated.map(l => li(l, l.kind === 'Expanded' ? 'Expanded' : 'New')), ...kept.map(i => li(i, 'Still active from R' + i.round, 'kept')), ...(r.givenUp || []).map(i => li(i, 'Given up', 'kept'))])}</div>
       <div><h4>Deprioritised</h4>${list(r.dep.map(i => plain(i)))}</div>
       <div><h4>Future interest</h4>${list(r.fut.map(i => plain(i)))}</div></div></div>`;
   });

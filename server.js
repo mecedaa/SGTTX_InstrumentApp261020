@@ -110,7 +110,7 @@ function visibleOnTable(g, tfKey) {
   }
   for (const c of db.cards) {
     const base = t.items[c.id], it = t.items[c.id + '~2'];
-    const eligible = c.expanded.enabled && c.expanded.rounds.includes(r) && base && base.actRound && base.actRound < r;
+    const eligible = c.expanded.enabled && c.expanded.rounds.includes(r) && base && base.actRound && base.actRound < r && base.pile === 'act';
     if (eligible || (it && it.pile)) out.push(c.id + '~2');
   }
   return out;
@@ -135,11 +135,12 @@ function checkPile(g, t, id, pile) {
   if (it.pile === pile) return null;
   if (isExp(id)) {
     const base = t.items[baseOf(id)];
-    if (!base || !base.actRound || base.actRound >= r) return 'Playable only if your task force has already activated this instrument in a previous round.';
+    if (!base || !base.actRound || base.actRound >= r || base.pile !== 'act') return 'Playable only if your table activated this instrument in a previous round and it is still active.';
   }
   if (it.pile === 'act' && it.pileRound < r) return LOCKED_ACT;
   if (it.pile === 'dep' && it.pileRound < r && pile !== 'act') return 'Previously deprioritised cards can only come back by being activated.';
   if (pile === 'act' && actThisRound(t, r, id) >= RULES.actMax) return 'You have already placed three cards in Activate this round. Move one out first.';
+  if (pile === 'act' && it.givenUp === r) return 'Your table gave up this instrument this round. To undo, move the card you brought back out of Activate.';
   if (pile === 'dep' && depThisRound(t, r, id) >= RULES.depPerRound) return 'You have already deprioritised three this round.';
   if (pile === 'fut' && instrumentsIn(t, 'fut', baseOf(id)) >= RULES.futMax) return 'Future interest already holds three.';
   return null;
@@ -147,6 +148,10 @@ function checkPile(g, t, id, pile) {
 function logMove(g, t, id, from, to, who) {
   const c = cardById(baseOf(id));
   t.log.push({ t: new Date().toISOString(), round: g.round, card: (c ? c.title : id) + (isExp(id) ? ' (Expanded)' : ''), from: from ? PILES[from] : 'Table', to: to ? PILES[to] : 'Table', who: String(who || '').slice(0, 12) });
+}
+function giveUpOptions(t, r) {
+  return Object.entries(t.items).filter(([id, it]) => !isExp(id) && it.pile === 'act' && it.pileRound < r && cardById(id))
+    .map(([id]) => ({ id, title: cardById(id).title, cats: cardById(id).cats }));
 }
 function applyAction(g, tfKey, a) {
   const t = g.tables[tfKey];
@@ -158,6 +163,16 @@ function applyAction(g, tfKey, a) {
   const it = item(t, id);
   const pile = a.pile || null;
   if (pile && !PILES[pile]) return 'Unknown pile.';
+  // moving a brought-back card out of Activate in the same round undoes the whole swap
+  if (it.swap && it.pile === 'act' && it.pileRound === g.round && pile !== 'act') {
+    if (!choicesOpen(g)) return 'Choices are locked.';
+    const gu = t.items[it.swap.giveUp];
+    logMove(g, t, id, 'act', 'dep', a.who);
+    it.pile = 'dep'; it.pileRound = it.swap.depRound; it.actRound = null;
+    if (gu) { logMove(g, t, it.swap.giveUp, gu.pile, 'act', a.who); gu.pile = 'act'; gu.pileRound = it.swap.giveUpRound; gu.givenUp = null; }
+    delete it.swap;
+    return null;
+  }
   if (!pile) {
     if (!it.pile) return null;
     if (!choicesOpen(g)) return 'Choices are locked.';
@@ -170,6 +185,23 @@ function applyAction(g, tfKey, a) {
   }
   const err = checkPile(g, t, id, pile); if (err) return err;
   if (it.pile === pile) return null;
+  // bringing back a card deprioritised in an earlier round: the table gives up one instrument activated in an earlier round
+  if (pile === 'act' && it.pile === 'dep' && it.pileRound < g.round) {
+    const options = giveUpOptions(t, g.round);
+    if (!options.length) return 'To bring back a deprioritised card, your table must give up an instrument it activated in an earlier round. It has none to give up.';
+    const gid = String(a.giveUp || '');
+    if (!gid) return { needGiveUp: options };
+    if (!options.some(o => o.id === gid)) return 'That instrument cannot be given up.';
+    const gu = t.items[gid];
+    logMove(g, t, gid, 'act', null, a.who);
+    const swap = { giveUp: gid, giveUpRound: gu.pileRound, depRound: it.pileRound };
+    gu.pile = null; gu.pileRound = null; gu.givenUp = g.round;
+    const ex = t.items[gid + '~2'];
+    if (ex && ex.pile) { logMove(g, t, gid + '~2', ex.pile, null, a.who); ex.pile = null; ex.pileRound = null; }
+    logMove(g, t, id, it.pile, 'act', a.who);
+    it.pile = 'act'; it.pileRound = g.round; it.actRound = g.round; it.swap = swap;
+    return null;
+  }
   if (it.pile === 'act' && !isExp(id) && it.actRound === g.round) it.actRound = null;
   logMove(g, t, id, it.pile, pile, a.who);
   it.pile = pile; it.pileRound = g.round;
@@ -197,9 +229,12 @@ function computeReturns(g, r) {
       .sort((a, b) => (cardById(baseOf(a[0])).print ?? 99) - (cardById(baseOf(b[0])).print ?? 99))
       .map(([id, it]) => ({ id, title: cardById(baseOf(id)).title + (isExp(id) ? ' (Expanded)' : ''), cats: cardById(baseOf(id)).cats, round: it.pileRound }));
     const act = titlesIn('act'), dep = titlesIn('dep', true), fut = titlesIn('fut');
+    const givenUp = Object.entries(t.items).filter(([id, it]) => it.givenUp === r && cardById(id)).map(([id]) => ({ id, title: cardById(id).title, cats: cardById(id).cats, round: r }));
+    const broughtBack = Object.entries(t.items).filter(([id, it]) => it.swap && it.pile === 'act' && it.pileRound === r && cardById(id)).map(([id]) => cardById(id).title);
     const notes = [];
     if (dep.length < RULES.depPerRound) notes.push(`Deprioritised ${dep.length} of ${RULES.depPerRound} this round.`);
-    out[tfKey] = { lines, act, dep, fut, notes };
+    if (givenUp.length) notes.push(`Gave up ${givenUp.map(x => x.title).join('; ')} to bring back ${broughtBack.join('; ')}.`);
+    out[tfKey] = { lines, act, dep, fut, givenUp, notes };
   }
   return out;
 }
@@ -226,7 +261,7 @@ function participantState(g, tfKey) {
   const t = g.tables[tfKey], other = otherOf(tfKey);
   const cards = visibleOnTable(g, tfKey).map(id => {
     const c = cardById(baseOf(id)), it = t.items[id] || {};
-    return { ...front(c, isExp(id)), pile: it.pile || null, pileRound: it.pileRound || null, wasFut: it.wasFut || null };
+    return { ...front(c, isExp(id)), pile: it.pile || null, pileRound: it.pileRound || null, wasFut: it.wasFut || null, givenUp: it.givenUp || null, swapped: !!it.swap };
   });
   const readouts = Object.keys(g.returns).map(Number).sort().filter(r => readoutsReleased(g, r))
     .map(r => ({ round: r, label: ROUND_LABELS[r] || '', lines: g.returns[r][tfKey].lines.map(l => ({ kind: l.kind, title: l.title, cats: l.cats, text: l.text, econ: l.econ, pol: l.pol })) }));
@@ -236,7 +271,7 @@ function participantState(g, tfKey) {
   const lastChoice = g.choiceRounds.length ? Math.max(...g.choiceRounds) : 0;
   const summary = g.phase === 'ended' || (lastChoice > 0 && g.round > lastChoice);
   const played = Object.keys(g.returns).map(Number).sort().filter(r => roundClosed(g, r) && g.choiceRounds.includes(r))
-    .map(r => { const o = g.returns[r][tfKey]; return { round: r, label: ROUND_LABELS[r] || '', activated: o.lines.map(l => ({ id: l.id, kind: l.kind, title: l.title, cats: l.cats })), act: o.act, dep: o.dep, fut: o.fut }; });
+    .map(r => { const o = g.returns[r][tfKey]; return { round: r, label: ROUND_LABELS[r] || '', activated: o.lines.map(l => ({ id: l.id, kind: l.kind, title: l.title, cats: l.cats })), act: o.act, dep: o.dep, fut: o.fut, givenUp: o.givenUp || [] }; });
   // card fronts for everything this table has touched, so the summary can open any of them
   const playedCards = summary ? Object.keys(t.items).filter(id => cardById(baseOf(id))).map(id => front(cardById(baseOf(id)), isExp(id))) : [];
   return {
@@ -320,6 +355,7 @@ const server = http.createServer(async (req, res) => {
       const g = db.games[mm[1]]; if (!g) return send(res, 404, { error: 'No exercise with that code.' });
       const b = await readBody(req); if (!TF[b.tf]) return send(res, 400, { error: 'Unknown table.' });
       const err = applyAction(g, b.tf, b);
+      if (err && err.needGiveUp) return send(res, 200, { error: null, needGiveUp: err.needGiveUp, state: participantState(g, b.tf) });
       if (!err) touch(g);
       return send(res, err ? 409 : 200, { error: err || null, state: participantState(g, b.tf) });
     }
