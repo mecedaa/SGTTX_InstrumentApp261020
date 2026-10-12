@@ -41,7 +41,15 @@ header .sync{font-size:13px;color:var(--on-dark-2)}
 #banner button{margin-left:8px;padding:4px 10px;border-radius:5px;border:1px solid var(--warn);background:transparent;color:var(--warn);font-size:13.5px}
 main{flex:1;overflow:auto;min-height:0;padding:16px}
 main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;letter-spacing:.02em}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:14px;margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+@media (min-width:1100px){body:not(.docked) .grid{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.grid .card,.grid .slot{min-height:196px}
+.grid .cbody{padding:7px 8px}
+.grid .ctitle{font-size:13.5px}
+.grid .cdo{font-size:10.5px;-webkit-line-clamp:7}
+.grid .band span{padding:0 5px 5px;font-size:8.5px}
+.grid .band.n3 span{padding:0 3px 5px;font-size:6.5px}
+#futSec h2 b{color:var(--warn);font-weight:600}
 .grid .card{cursor:pointer;touch-action:manipulation}
 .grid .card.dragsrc{opacity:.25}
 .slot{min-height:214px;border:2px dashed rgba(230,237,242,.25);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--on-dark-2);cursor:pointer;background:rgba(0,0,0,.08)}
@@ -49,8 +57,14 @@ main h2{font-size:14px;font-weight:600;color:var(--on-dark-2);margin:0 0 10px;le
 .slot .where{margin-top:auto;font-weight:700;color:var(--warn);font-size:12.5px}
 .ghost{position:fixed;pointer-events:none;z-index:40;transform:rotate(-2deg);box-shadow:0 14px 28px rgba(0,0,0,.4);width:176px}
 /* trays */
-#trays{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:12px 16px 14px;background:var(--harbour-2);border-top:1px solid #16303F;flex:none;max-height:40vh;overflow:auto}
-.tray{border:2px dashed rgba(230,237,242,.35);border-radius:10px;min-height:120px;padding:10px 12px 12px;transition:background .12s,border-color .12s}
+#trays{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:12px 16px 14px;background:var(--harbour-2);border-top:1px solid #16303F;flex:none;max-height:42vh;overflow-y:auto;align-items:start}
+.tray{border:2px dashed rgba(230,237,242,.35);border-radius:10px;min-height:120px;padding:10px 12px 12px;transition:background .12s,border-color .12s;min-width:0;overflow:hidden}
+.earlier{margin-top:8px;padding-top:6px;border-top:1px solid rgba(230,237,242,.18)}
+.earlier h3{margin:0 0 4px;font-size:11.5px;font-weight:600;color:var(--on-dark-2)}
+.earlier ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.earlier li{font-size:12px;color:var(--on-dark);display:flex;gap:6px;align-items:center;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.earlier li span{overflow:hidden;text-overflow:ellipsis}
+.earlier li:focus-visible{outline:2px solid var(--warn)}
 .tray.hot{background:rgba(242,178,51,.12);border-color:var(--warn)}
 .tray.locked{border-style:solid;border-color:rgba(230,237,242,.15)}
 .tray h2{margin:0 0 2px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
@@ -169,12 +183,13 @@ body.docked #closeSheet,body.docked #resBtn{display:none}
   </header>
   <div id="banner" role="status"></div>
   <main id="main">
+    <section id="futSec" hidden><h2><b>Future interest from an earlier round.</b> Back on the table this round.</h2><div class="grid" id="futGrid"></div></section>
     <section id="expSec" hidden><h2>Expanded cards you can play this round</h2><div class="grid" id="expGrid"></div></section>
     <section id="gridSec"><h2 id="gridHead">Instrument cards</h2><div class="grid" id="grid"></div></section>
     <section id="summary" hidden></section>
   </main>
   <section id="trays">
-    <div class="tray" data-pile="act"><h2>Activate <span class="count" id="c-act"></span></h2><p class="rule">Up to three instruments.</p><div class="chips" id="p-act"></div></div>
+    <div class="tray" data-pile="act"><h2>Activate <span class="count" id="c-act"></span></h2><p class="rule">Up to three each round. Expanded cards count.</p><div class="chips" id="p-act"></div></div>
     <div class="tray" data-pile="dep"><h2>Deprioritise <span class="count" id="c-dep"></span></h2><p class="rule">Three each round.</p><div class="chips" id="p-dep"></div></div>
     <div class="tray" data-pile="fut"><h2>Future interest <span class="count" id="c-fut"></span></h2><p class="rule">Up to three.</p><div class="chips" id="p-fut"></div></div>
   </section>
@@ -265,20 +280,25 @@ function render() {
   // grid: base cards in print order, fixed slots; expanded cards in their own row
   const base = S.cards.filter(c => !c.exp).sort(byPrint), exp = S.cards.filter(c => c.exp).sort(byPrint);
   const grid = document.getElementById('grid'); grid.innerHTML = '';
-  base.forEach(c => grid.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  base.filter(c => !c.wasFut).forEach(c => grid.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  const fut = base.filter(c => c.wasFut);
+  const fg = document.getElementById('futGrid'); fg.innerHTML = '';
+  fut.forEach(c => fg.appendChild(c.pile ? slotEl(c) : cardEl(c)));
+  document.getElementById('futSec').hidden = !fut.length;
   const eg = document.getElementById('expGrid'); eg.innerHTML = '';
   exp.forEach(c => eg.appendChild(c.pile ? slotEl(c) : cardEl(c)));
   document.getElementById('expSec').hidden = !exp.length;
 
   ['act', 'dep', 'fut'].forEach(p => {
     const box = document.getElementById('p-' + p); box.innerHTML = '';
-    const list = pileList(p);
-    if (!list.length) box.innerHTML = `<div class="empty">${S.choices ? 'Drag a card here, or open a card and choose.' : 'Empty.'}</div>`;
-    list.forEach(c => box.appendChild(chipEl(c, p)));
+    const all = pileList(p), now = all.filter(c => c.pileRound === S.round || !S.round), before = all.filter(c => !now.includes(c));
+    if (!now.length) box.innerHTML = `<div class="empty">${S.choices ? 'Drag a card here, or open a card and choose.' : 'Empty.'}</div>`;
+    now.forEach(c => box.appendChild(chipEl(c, p)));
+    if (before.length) box.appendChild(earlierEl(before, p));
   });
   const R = S.rules;
-  setCount('c-act', `${S.counts.act} of ${R.actMax}`, S.counts.act >= R.actMax);
-  setCount('c-dep', S.round ? `${S.counts.dep} of ${R.depPerRound}` : '', S.counts.dep >= R.depPerRound);
+  setCount('c-act', S.round ? `${S.counts.act} of ${R.actMax} this round` : '', S.counts.act >= R.actMax);
+  setCount('c-dep', S.round ? `${S.counts.dep} of ${R.depPerRound} this round` : '', S.counts.dep >= R.depPerRound);
   setCount('c-fut', `${S.counts.fut} of ${R.futMax}`, S.counts.fut >= R.futMax);
 
   // results: readouts, hindsight, other table
@@ -313,6 +333,12 @@ function render() {
 }
 const byPrint = (a, b) => (a.print ?? 99) - (b.print ?? 99);
 function pileList(p) { return S.cards.filter(c => c.pile === p).sort((a, b) => (a.pileRound || 0) - (b.pileRound || 0) || byPrint(a, b)); }
+function earlierEl(list, p) {
+  const el = document.createElement('div'); el.className = 'earlier';
+  el.innerHTML = `<h3>${p === 'act' ? 'Still active from earlier rounds' : 'Deprioritised in earlier rounds'}</h3><ul>${list.map(c => `<li tabindex="0" role="button" data-id="${esc(c.id)}">${dots(c.cats)}<span>${esc(c.title)}${c.exp ? ' (Expanded)' : ''}</span></li>`).join('')}</ul>`;
+  el.querySelectorAll('li').forEach(li => { li.onclick = e => { e.stopPropagation(); openCard(li.dataset.id); }; li.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(li.dataset.id); } }; });
+  return el;
+}
 function setCount(id, t, full) { const e = document.getElementById(id); e.textContent = t; e.classList.toggle('full', !!full); }
 function cardEl(c) {
   const el = document.createElement('div');
@@ -379,14 +405,14 @@ function openCard(id, keep) {
   if (!keep) lastFocus = document.activeElement;
   openId = id; closePile();
   const locked = !S.choices;
-  const oldDep = c.pile === 'dep' && c.pileRound < S.round;
-  const btn = (p, label) => `<button data-p="${p}" ${c.pile === p || locked || (oldDep && p !== 'act') ? 'disabled' : ''} class="${p === 'act' ? 'primary' : ''}">${label}</button>`;
+  const oldDep = c.pile === 'dep' && c.pileRound < S.round, oldAct = c.pile === 'act' && c.pileRound < S.round;
+  const btn = (p, label) => `<button data-p="${p}" ${c.pile === p || locked || oldAct || (oldDep && p !== 'act') ? 'disabled' : ''} class="${p === 'act' ? 'primary' : ''}">${label}</button>`;
   document.getElementById('bigcard').innerHTML = band(c.cats, c.exp) +
     `<div class="cbody"><div class="tag"><span>${c.exp ? 'Expanded <span class="two">2</span>' : 'Activate'}</span>${c.print != null ? '<span>No. ' + esc(c.print) + '</span>' : ''}</div>
      <div class="ctitle">${esc(c.title)}</div><div class="lbl">What you do</div><div class="do">${esc(c.text)}</div>
      ${c.exp ? '<div class="foot">Playable only if your table has already activated this instrument in a previous round.</div>' : ''}
-     ${c.pile ? `<div class="state">In ${PILES[c.pile]} since round ${c.pileRound}.${oldDep ? ' It can only come back by being activated.' : ''}</div>` : ''}</div>
-     <div class="acts">${btn('act', 'Activate')}${btn('dep', 'Deprioritise')}${btn('fut', 'Future interest')}<button data-p="" ${!c.pile || locked || oldDep ? 'disabled' : ''}>Back to table</button><button data-close style="grid-column:1/-1">Close</button></div>`;
+     ${c.pile ? `<div class="state">In ${PILES[c.pile]} since round ${c.pileRound}.${oldDep ? ' It can only come back by being activated.' : ''}${oldAct ? ' It stays active.' : ''}</div>` : c.wasFut ? `<div class="state">Marked for future interest in round ${c.wasFut}.</div>` : ''}</div>
+     <div class="acts">${btn('act', 'Activate')}${btn('dep', 'Deprioritise')}${btn('fut', 'Future interest')}<button data-p="" ${!c.pile || locked || oldDep || oldAct ? 'disabled' : ''}>Back to table</button><button data-close style="grid-column:1/-1">Close</button></div>`;
   const m = document.getElementById('modal'); m.classList.add('open');
   m.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { closeCard(); act({ type: 'pile', id, pile: b.dataset.p || null }); });
   m.querySelector('[data-close]').onclick = closeCard;
@@ -402,7 +428,7 @@ function showPile(p) {
   const list = pileList(p);
   const box = document.getElementById('bigcard2');
   box.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h2 style="margin:0;font-size:18px">${PILES[p]}</h2><button class="hbtn" id="closePile">Close</button></div>
-    <p class="empty" style="margin:0 0 10px">${p === 'act' ? 'Up to three instruments.' : p === 'dep' ? 'Three each round.' : 'Up to three.'}</p><div class="chips" id="pileChips"></div>`;
+    <p class="empty" style="margin:0 0 10px">${p === 'act' ? 'Up to three each round. Expanded cards count.' : p === 'dep' ? 'Three each round.' : 'Up to three.'}</p><div class="chips" id="pileChips"></div>`;
   const chips = box.querySelector('#pileChips');
   if (!list.length) chips.innerHTML = '<div class="empty">Empty.</div>';
   list.forEach(c => chips.appendChild(chipEl(c, p)));

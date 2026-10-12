@@ -120,6 +120,11 @@ function instrumentsIn(t, pile, excludeBase) {
   for (const [id, it] of Object.entries(t.items)) if (it.pile === pile && baseOf(id) !== excludeBase && cardById(baseOf(id))) s.add(baseOf(id));
   return s.size;
 }
+// cards placed in Activate this round (new instruments and Expanded cards); earlier activations stay active and do not count
+function actThisRound(t, r, excludeId) {
+  return Object.entries(t.items).filter(([id, it]) => id !== excludeId && it.pile === 'act' && it.pileRound === r && cardById(baseOf(id))).length;
+}
+const LOCKED_ACT = 'Activated in an earlier round. It stays active.';
 function depThisRound(t, r, excludeId) {
   return Object.entries(t.items).filter(([id, it]) => id !== excludeId && it.pile === 'dep' && it.pileRound === r && cardById(baseOf(id))).length;
 }
@@ -132,11 +137,9 @@ function checkPile(g, t, id, pile) {
     const base = t.items[baseOf(id)];
     if (!base || !base.actRound || base.actRound >= r) return 'Playable only if your task force has already activated this instrument in a previous round.';
   }
+  if (it.pile === 'act' && it.pileRound < r) return LOCKED_ACT;
   if (it.pile === 'dep' && it.pileRound < r && pile !== 'act') return 'Previously deprioritised cards can only come back by being activated.';
-  if (pile === 'act' && instrumentsIn(t, 'act', baseOf(id)) >= RULES.actMax) {
-    const wasDep = it.pile === 'dep' && it.pileRound < r;
-    return 'Activate already holds three instruments. Move one out first.' + (wasDep ? ' To activate a previously deprioritised card, give up one of your activated cards.' : '');
-  }
+  if (pile === 'act' && actThisRound(t, r, id) >= RULES.actMax) return 'You have already placed three cards in Activate this round. Move one out first.';
   if (pile === 'dep' && depThisRound(t, r, id) >= RULES.depPerRound) return 'You have already deprioritised three this round.';
   if (pile === 'fut' && instrumentsIn(t, 'fut', baseOf(id)) >= RULES.futMax) return 'Future interest already holds three.';
   return null;
@@ -159,6 +162,7 @@ function applyAction(g, tfKey, a) {
     if (!it.pile) return null;
     if (!choicesOpen(g)) return 'Choices are locked.';
     if (it.pile === 'dep' && it.pileRound < g.round) return 'Previously deprioritised cards can only come back by being activated.';
+    if (it.pile === 'act' && it.pileRound < g.round) return LOCKED_ACT;
     logMove(g, t, id, it.pile, null, a.who);
     if (it.pile === 'act' && !isExp(id) && it.actRound === g.round) it.actRound = null;
     it.pile = null; it.pileRound = null;
@@ -222,7 +226,7 @@ function participantState(g, tfKey) {
   const t = g.tables[tfKey], other = otherOf(tfKey);
   const cards = visibleOnTable(g, tfKey).map(id => {
     const c = cardById(baseOf(id)), it = t.items[id] || {};
-    return { ...front(c, isExp(id)), pile: it.pile || null, pileRound: it.pileRound || null };
+    return { ...front(c, isExp(id)), pile: it.pile || null, pileRound: it.pileRound || null, wasFut: it.wasFut || null };
   });
   const readouts = Object.keys(g.returns).map(Number).sort().filter(r => readoutsReleased(g, r))
     .map(r => ({ round: r, label: ROUND_LABELS[r] || '', lines: g.returns[r][tfKey].lines.map(l => ({ kind: l.kind, title: l.title, cats: l.cats, text: l.text, econ: l.econ, pol: l.pol })) }));
@@ -239,7 +243,7 @@ function participantState(g, tfKey) {
     code: g.code, tf: tfKey, tfName: TF[tfKey], otherName: TF[other], round: g.round, roundLabel: ROUND_LABELS[g.round] || '', phase: g.phase,
     choices: choicesOpen(g), rules: RULES, cards, readouts, peek, summary, played, playedCards,
     hindsight: g.hindsight ? hindsightFor(g, tfKey) : null, v: g.v,
-    counts: { act: instrumentsIn(t, 'act'), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') },
+    counts: { act: actThisRound(t, g.round), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') },
   };
 }
 function adminGame(g) {
@@ -249,7 +253,7 @@ function adminGame(g) {
     const list = pile => Object.entries(t.items).filter(([id, it]) => it.pile === pile && cardById(baseOf(id)))
       .sort((a, b) => (cardById(baseOf(a[0])).print ?? 99) - (cardById(baseOf(b[0])).print ?? 99))
       .map(([id, it]) => ({ id, title: cardById(baseOf(id)).title + (isExp(id) ? ' (Expanded)' : ''), cats: cardById(baseOf(id)).cats, round: it.pileRound }));
-    tables[k] = { name: TF[k], act: list('act'), dep: list('dep'), fut: list('fut'), counts: { act: instrumentsIn(t, 'act'), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') }, moves: t.log.length, totals: totals(g, k), hindsightCount: hindsightFor(g, k).length };
+    tables[k] = { name: TF[k], act: list('act'), dep: list('dep'), fut: list('fut'), counts: { act: actThisRound(t, g.round), dep: depThisRound(t, g.round), fut: instrumentsIn(t, 'fut') }, moves: t.log.length, totals: totals(g, k), hindsightCount: hindsightFor(g, k).length };
   }
   const released = Object.keys(g.returns).map(Number).filter(r => readoutsReleased(g, r));
   return { code: g.code, created: g.created, round: g.round, roundLabel: ROUND_LABELS[g.round] || '', phase: g.phase, choiceRounds: g.choiceRounds, returns: g.returns, released, hindsight: g.hindsight, peek: g.peek, tables, v: g.v };
@@ -368,7 +372,12 @@ const server = http.createServer(async (req, res) => {
         if (sub === '' && m === 'DELETE') { delete db.games[g.code]; save(); notify('*', 0); return send(res, 200, { ok: true }); }
         if (sub === '/control' && m === 'POST') {
           const b = await readBody(req);
-          if (b.action === 'open') { const r = +b.round; if (r < 1 || r > 3) return send(res, 400, { error: 'Round must be 1, 2 or 3.' }); g.round = r; g.phase = 'open'; }
+          if (b.action === 'open') {
+            const r = +b.round; if (r < 1 || r > 3) return send(res, 400, { error: 'Round must be 1, 2 or 3.' });
+            // moving to a new round: Future interest cards go back on the table, marked with the round they were set aside
+            if (r > g.round) for (const k of TF_KEYS) for (const it of Object.values(g.tables[k].items)) if (it.pile === 'fut') { it.wasFut = it.pileRound; it.pile = null; it.pileRound = null; }
+            g.round = r; g.phase = 'open';
+          }
           else if (b.action === 'close') { if (g.phase !== 'open') return send(res, 409, { error: 'No round is open.' }); g.phase = 'closed'; g.returns[g.round] = computeReturns(g, g.round); }
           else if (b.action === 'recompute') { if (!g.round) return send(res, 409, { error: 'No round yet.' }); g.returns[g.round] = computeReturns(g, g.round); }
           else if (b.action === 'end') { g.phase = 'ended'; }

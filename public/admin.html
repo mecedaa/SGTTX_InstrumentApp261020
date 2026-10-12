@@ -277,7 +277,7 @@ function tableHTML(k) {
   const tot = `<div class="totals"><h4><span>Running total (facilitator only)</span><span></span></h4>
     <div class="tgrid"><span>Economic</span>${num(T.econ)}<span>Political</span>${num(T.pol)}</div>
     <p class="hint">${rounds.length ? rounds.map(n => `Round ${n}: Economic ${sign(T.byRound[n].econ)}, Political ${sign(T.byRound[n].pol)}`).join('. ') + '. ' : ''}Sum of the gauges on this table's readouts.</p></div>`;
-  return `<div class="panel tf"><h3><span class="tfh"><span class="ico">${ICON[k]}</span>${t.name}</span><span class="hint">${t.moves} moves${game.hindsight ? `, ${t.hindsightCount} hindsight` : ''}</span></h3>${pile(t.act, 'Activate', cnt.act + ' of 3')}${pile(t.dep, 'Deprioritise', cnt.dep + ' this round')}${pile(t.fut, 'Future interest', cnt.fut + ' of 3')}${warn}${tot}</div>`;
+  return `<div class="panel tf"><h3><span class="tfh"><span class="ico">${ICON[k]}</span>${t.name}</span><span class="hint">${t.moves} moves${game.hindsight ? `, ${t.hindsightCount} hindsight` : ''}</span></h3>${pile(t.act, 'Activate', cnt.act + ' of 3 this round')}${pile(t.dep, 'Deprioritise', cnt.dep + ' this round')}${pile(t.fut, 'Future interest', cnt.fut + ' of 3')}${warn}${tot}</div>`;
 }
 function returnsHTML() {
   const rounds = Object.keys(game.returns).map(Number).sort().filter(n => game.choiceRounds.includes(n));
