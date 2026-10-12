@@ -22,7 +22,7 @@ No external packages are needed. The server is a single Node file.
 
 ## What the tables see
 
-- The 15 cards stay in a fixed grid in Print No. order. Cards cannot be dragged around the table, so there is nothing to tidy or reset. A card placed in a pile leaves an empty slot showing which pile it is in.
+- Cards sit in a grid, eight to a row on a laptop. Cards cannot be dragged around the table, so there is nothing to tidy or reset. A card placed in a pile this round leaves an outline showing which pile it is in. From round 2, cards placed in an earlier round are removed from the grid (they are listed in the piles), and the grid shows Expanded cards first, then cards back from Future interest (marked in yellow), then the rest.
 - On a laptop, drag a card onto a pile or click it and choose. On a phone or tablet, tap a card and choose. On a phone, tap a pile at the bottom of the screen to see what is in it.
 - When anyone at the table moves a card into or out of a pile, everyone at that table sees it straight away.
 - **Results** (top right) opens the readout cards, the hindsight cards once released, and the other table's choices if that is switched on. The drawer opens by itself when new readouts or hindsight cards arrive.
@@ -31,9 +31,9 @@ No external packages are needed. The server is a single Node file.
 
 ## Rules the app enforces
 
-- Activate holds up to three instruments. An Expanded card does not take a second slot.
+- Activate takes up to three cards each round: new instruments, Expanded cards, or a mix. Instruments activated in an earlier round stay active, do not count toward the three, and cannot be moved.
 - Deprioritise takes three per round. Cards deprioritised in an earlier round stay in the pile and can only come back by being activated.
-- Future interest holds up to three.
+- Future interest holds up to three. When you open the next round, Future interest cards go back on the table, marked in yellow, and the Future interest pile starts empty.
 - An Expanded card is only playable if the table activated that instrument in an earlier round.
 
 ## Readouts and gauges
